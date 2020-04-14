@@ -1,18 +1,32 @@
-<template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+<template lang="pug">
+  v-container
+    v-row.mb-5
+      v-col
+        v-card(flat)
+          v-card-title Welcome to Smart Collab
+          v-card-text This is a small collection of collaboration tools. 
+    v-row 
+      v-col
+        v-card
+          v-card-title Mermaid Swarm
+          v-card-text Create diagramms collaboratively using 
+            a(href='https://github.com/mermaid-js/mermaid#readme') mermaid
+            |.
+          v-card-actions
+            v-btn(text color='primary' to='/mermaid') Open
+
+
 </template>
 
-<script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
-export default {
-  name: 'Home',
-  components: {
-    HelloWorld
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import { StoreType } from '@/store'
+@Component({ store: ['title'] })
+export default class Home extends Vue {
+  name = 'Home'
+  $store!: StoreType
+  mounted() {
+    this.$store.title = 'Smart Collab'
   }
 }
 </script>
