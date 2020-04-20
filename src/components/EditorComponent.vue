@@ -103,7 +103,6 @@ A[Hard] -->|Text| B(Round)
 B --> C{Decision}
 C -->|One| D[Result 1]
 C -->|Two| E[Result 2]`.trim(),
-      // mode: 'javascript',
       theme: 'idea',
       lineNumbers: true,
       gutters: ['errors'],
@@ -119,6 +118,7 @@ C -->|Two| E[Result 2]`.trim(),
         this.$emit('input', this.value)
       }, 200),
     )
+    this.$emit('editor', this.editor.instance)
   }
 
   mounted() {
@@ -128,68 +128,72 @@ C -->|Two| E[Result 2]`.trim(),
 </script>
 <style lang="stylus" scoped>
 .editor-card {
-  display: flex
-  flex-direction: column
+  display: flex;
+  flex-direction: column;
 }
 
 #editor {
-  display: flex
-  flex-direction: column
-  flex: 1
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 
   .codemirror-container {
-    flex: 1 1 auto
+    flex: 1 1 auto;
   }
 
   .error-container {
-    height: 70px
+    height: 70px;
   }
 }
 
 .error-list {
-  color: #a90101
-  font-family: monospace
-  font-size: small
-  line-height: normal
-  overflow: auto
+  color: #a90101;
+  font-family: monospace;
+  font-size: small;
+  line-height: normal;
+  overflow: auto;
 }</style>
 
 <style lang="stylus">
 .gutter-error {
-  font-size: x-small
+  font-size: x-small;
 }
 
 .CodeMirror {
-  height: 100%
-  border: 1px solid #f0f0f0
+  height: 100%;
+  border: 1px solid #f0f0f0;
+}
+
+.CodeMirror-scroll {
+  padding-top: 10px;
 }
 
 .remote-caret {
-  position: absolute
-  border-left: black
-  border-left-style: solid
-  border-left-width: 1.2px
-  height: 1.1em
-  margin-left: -1px
-  opacity: 0.7
-  font-family: 'Roboto', sans-serif !important
+  position: absolute;
+  border-left: black;
+  border-left-style: solid;
+  border-left-width: 1.2px;
+  height: 1.1em;
+  margin-left: -1px;
+  opacity: 0.7;
+  font-family: 'Roboto', sans-serif !important;
 }
 
 .remote-caret > div {
-  font-family: 'Roboto', sans-serif !important
-  position: relative
-  top: -1em
-  margin-left: -1.2px
-  font-size: 0.7em
-  background-color: rgb(250, 129, 0)
-  font-family: serif
-  font-style: normal
-  font-weight: normal
-  line-height: normal
-  user-select: none
-  color: white
-  padding: 1px 5px
-  z-index: 3
-  box-shadow: 1px 1px 4px #666
+  font-family: 'Roboto', sans-serif !important;
+  position: relative;
+  top: -1em;
+  margin-left: -1.2px;
+  font-size: 0.7em;
+  background-color: rgb(250, 129, 0);
+  font-family: serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  user-select: none;
+  color: white;
+  padding: 1px 5px;
+  z-index: 3;
+  box-shadow: 1px 1px 4px #666;
 }
 </style>

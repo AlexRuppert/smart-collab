@@ -1,45 +1,95 @@
 <template lang="pug">
-  v-card.room-card
-    v-toolbar.toolbar(flat :extension-height='extensionHeight')
-      
-      template(v-slot:extension)
-        .room-name-container.mb-2(v-show='extensionHeight>0')
-          v-text-field.room-name.mr-3(label='Room' :disabled='isCreateMode' v-model='room.name' solo flat hide-details dense height='20' clearable)
-          v-btn.mr-3(v-show='isCreateMode' outlined height='40' @click='')
-            v-icon mdi-content-copy
-          v-btn(outlined color='primary' height='40' @click='connect()')
-            v-icon(left) mdi-lan-connect
-            | Connect
+  v-card.room-card.py-3
+    //.room-name-container.my-2(v-show='extensionHeight>0')
+      v-text-field.room-name.mr-3(label='Room' :disabled='isCreateMode' v-model='room.name' hide-details clearable)
+      v-text-field.room-name.mr-3(label='Password' ref='password' v-model='room.password' hide-details clearable
+        :type='isCreateMode?"text":"password"' @keydown.enter='connect')
+      v-btn(color='primary' dark height='40' @click='connect')
+        v-icon(left) mdi-lan-connect
+        | Connect
+    v-row.mx-3
       v-menu(:close-on-content-click='false' nudge-bottom offset-y transition='scroll-y-transition')
         template(v-slot:activator='{ on }')
-          v-btn.text-none(outlined :color='user.color' v-on='on' max-width='200px' height='40')
-            v-avatar.mr-2(size='16' :color='user.color')
+          v-btn.mr-3.text-none(dark :color='user.color' v-on='on' max-width='200px' depressed)
+            v-icon(left) mdi-account
             | {{user.name}}
         v-card.user-config-menu
           v-card-text
             v-text-field(label='Name' maxlength='18' :color='user.color' v-model='user.name' clearable spellcheck='false')
             .color-selection
               v-btn.ma-1(v-for='color in swatches' :color='color' fab small @click='user.color=color')
-              v-btn.random.ma-1(color='#fff' fab small @click='user.color = generateColor()')
+              v-btn.random.ma-1(color='#fff' fab small @click='user.color = generateColor')
                 v-icon mdi-dice-3-outline
+      v-menu(nudge-bottom offset-y transition='scroll-y-transition')
+        template(v-slot:activator='{ on }')
+          v-btn.text-none(v-show='room.connected' text v-on='on' max-width='200px')
+            v-icon(left) mdi-account-group
+            | {{users.length}} Users
+        v-list(max-width='350px' dense)
+          v-list-item.pl-2(v-for='(user, index) in users' :key='index' :color='user.color' dense @click='')
+            v-list-item-avatar.my-0.mr-1
+              v-avatar(size=24 :color='user.color')
+            v-list-item-title {{user.name}}
       v-spacer
-      v-btn.mr-3(v-show='!room.connected' outlined height='40' @click='createMode()' )
-        v-icon(left) mdi-account-group-outline
-        | Create
-      v-btn(v-show='!room.connected' outlined height='40' @click='mode="join"')
-        v-icon(left) mdi-location-enter
-        | Join
-      v-btn.ml-3(v-show='room.connected' outlined height='40' @click='disconnect()')
-        v-icon(left) mdi-lan-disconnect
-        | Disconnect
-      
-  </template>
+      .buttons
+        v-dialog(v-model='dialogs.create' max-width=500)
+          template(v-slot:activator='{ on }')
+            v-btn.mr-3(v-show='!room.connected' @click='createMode' text color='primary')
+              v-icon(left) mdi-account-group-outline
+              | New
+          v-card
+            v-card-title(primary-title) Create New Room
+            v-card-text
+              v-row
+                v-col.d-flex
+                  v-text-field.mr-4(label='Room' disabled v-model='room.name' @keydown.enter='connect("create")')
+                  v-btn.random.mt-2(icon @click='generateRoom')
+                    v-icon mdi-dice-3-outline
+              v-row
+                v-col
+                  v-text-field(label='Password' ref='password' v-model='room.password' clearable @keydown.enter='connect("create")')
+            v-divider.mt-5
+            v-card-actions
+              v-spacer
+              v-btn(text @click='cancelMode') Cancel
+              v-btn(color='primary' text @click='connect("create")') Connect
+        v-dialog(v-model='dialogs.join' max-width=500)
+          template(v-slot:activator='{ on }')
+            v-btn.mr-3(v-show='!room.connected' @click='joinMode' text color='primary')
+              v-icon(left) mdi-location-enter
+              | Join
+          v-card
+            v-card-title(primary-title) Join Room
+            v-card-text
+              v-row
+                v-col
+                  v-text-field(label='Room' clearable v-model='room.name' @keydown.enter='connect("join")')
+              v-row
+                v-col
+                  v-text-field(label='Password' ref='password' v-model='room.password' clearable
+                    type='password' @keydown.enter='connect("join")')
+            v-divider.mt-5
+            v-card-actions
+              v-spacer
+              v-btn(text @click='cancelMode') Cancel
+              v-btn(color='primary' text @click='connect("join")') Connect
+              
+        v-btn.ml-3(v-show='room.connected' text color='primary' @click='copyRoom')
+          v-icon(left) mdi-share-variant
+          | Share
+        v-btn.ml-3(v-show='room.connected' text @click='disconnect')
+          | Disconnect
+</template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { StoreType } from '@/store'
 import { v4 as uuidv4 } from 'uuid'
-@Component
+import copy from 'copy-text-to-clipboard'
+
+@Component({ store: ['room', 'user'] })
 export default class RoomComponent extends Vue {
   name = 'RoomComponent'
+  $store!: StoreType
   swatches = [
     '#FF5722',
     '#F44336',
@@ -57,80 +107,118 @@ export default class RoomComponent extends Vue {
     '#FF9800',
     '#607D8B',
   ]
-
-  mode = 'none'
-  room = {
-    name: '',
-    connected: false,
+  @Watch('$store.user', { deep: true })
+  onUserchanged() {
+    this.$store.sync.setUser(this.$store.user)
   }
-  user = {
-    name: 'Unknown' + Math.floor(Math.random() * 100) + 1,
-    color: '#fab',
+  dialogs = {
+    create: false,
+    join: false,
+  }
+
+  users = [] as Array<{ name: string; color: string }>
+
+  cancelMode() {
+    this.dialogs.create = this.dialogs.join = false
   }
   createMode() {
-    this.mode = 'create'
+    this.dialogs.join = false
+    this.dialogs.create = true
+    this.focusPassword()
     this.generateRoom()
   }
+  joinMode() {
+    this.dialogs.join = true
+    this.dialogs.create = false
+    this.focusPassword()
+  }
+  focusPassword() {
+    setTimeout(() => {
+      if (this.$store.room.password.length <= 0) {
+        ;(this.$refs.password as HTMLInputElement).focus()
+      }
+    }, 200)
+  }
 
-  get isCreateMode() {
-    return this.mode === 'create'
+  updateRouter() {
+    if (this.$route.query.room !== this.$store.room.name) {
+      this.$router.push({ query: { room: this.$store.room.name } })
+    }
+  }
+  copyRoom() {
+    this.updateRouter()
+    copy(window.location.href)
+    this.$emit('notify', 'Link copied to clipboard!')
   }
   generateRoom() {
-    this.room.name = uuidv4()
+    this.$store.room.name = uuidv4()
   }
   generateColor() {
     return this.swatches[Math.floor(Math.random() * this.swatches.length)]
   }
-  get extensionHeight() {
-    return this.mode === 'none' ? '0' : '50'
+
+  applyRoomName() {
+    if (typeof this.$route.query?.room === 'string') {
+      this.$store.room.name = this.$route.query.room
+      this.joinMode()
+    }
   }
-  connect() {
-    this.room.connected = true
-    this.mode = 'none'
+
+  connect(mode: 'create' | 'join') {
+    this.cancelMode()
+    this.$store.room.connected = true
+    this.updateRouter()
+
+    this.$store.sync.connect(this.$store.room)
+
+    this.$emit('connected', { created: mode === 'create' })
   }
 
   disconnect() {
-    this.room.connected = false
+    this.$store.room.connected = false
+    this.$store.sync.disconnect()
+    this.$emit('disconnected')
   }
 
   initRoom() {
-    this.user.color = this.generateColor()
+    this.$store.user.color = this.generateColor()
+
+    setInterval(() => {
+      this.users = this.$store.sync.getUsers()
+    }, 1000)
   }
 
   mounted() {
+    this.applyRoomName()
     this.initRoom()
   }
 }
 </script>
 <style lang="stylus" scoped>
-.toolbar {
-  overflow: hidden;
-  transition: all 0.1s ease-in-out;
-}
+.toolbar
+  overflow hidden
+  transition all 0.1s ease-in-out
 
-.color-selection {
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 210px;
-  justify-content: center;
+.color-selection
+  display flex
+  flex-wrap wrap
+  justify-content center
+  max-width 210px
 
-  .random {
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.random
+  transition transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)
 
-    &:active {
-      transform: rotate(-50deg);
-    }
-  }
-}
+  &:active
+    transform rotate(-50deg)
 
-.room-name-container {
-  display: flex;
-  width: 100%;
+.room-name-container
+  display flex
+  width 100%
 
-  .room-name {
-    border: 1px solid #333;
-  }
-}
+.user-list
+  display flex
+  flex-wrap wrap
+  justify-content center
 </style>
 
-<style lang="stylus"></style>
+

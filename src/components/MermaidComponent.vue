@@ -18,13 +18,13 @@
               label='Curves' hide-details prepend-icon='mdi-chart-timeline-variant' single-line solo flat dense)
         v-btn(color='primary' icon @click='saveSvg()')
           v-icon mdi-floppy
-         
+        
     v-card-text.mermaid-container.pt-0
       #mermaid
         svg(xmlns="http://www.w3.org/2000/svg")
           g(ref='mermaidView' v-html='svg')
           
-     
+    
 </template>
 
 <script lang="ts">
@@ -161,26 +161,22 @@ export default class MermaidComponent extends Vue {
 </script>
 
 <style lang="stylus" scoped>
-.mermaid-container {
-  height: 100%
-}
+.mermaid-container
+  height 100%
 
-.graph-card {
-  display: flex
-  flex-direction: column
-}
+.graph-card
+  display flex
+  flex-direction column
 </style>
 <style lang="stylus">
-#mermaid {
+#mermaid
+  height 100%
   // justify-content: center
-  user-select: none
-  height: 100%
+  user-select none
 
-  svg {
-    border: 1px solid #f0f0f0
-    width: 100% !important
-    min-height: 400px
-    height: 100%
-  }
-}
+  svg
+    min-height 400px
+    width 100% !important
+    height 100%
+    border 1px solid #f0f0f0
 </style>

@@ -1,18 +1,18 @@
 <template lang="pug">
   v-container.container(fluid)
-    RoomComponent.room
-    EditorComponent.editor(@input='onCodeChanged' :errors='mermaidParsingErrors')
+    RoomComponent.room(@connected='onConnected' @notify='onNotify')
+    EditorComponent.editor(@input='onCodeChanged' :errors='mermaidParsingErrors' @editor='onEditorInitialized')
     MermaidComponent.graph(:code='code' @parseResult='onMermaidParsingResult')
-
+    v-snackbar(v-model='toaster.enabled' top :timeout='2000') {{ toaster.text }}
+      v-btn(dark icon @click='toaster.enabled = false') 
+        v-icon mdi-close
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { StoreType } from '@/store'
 
-import * as Y from 'yjs'
-import { WebrtcProvider } from 'y-webrtc/src/y-webrtc.js'
-import { CodeMirrorBinding } from 'y-codemirror'
+import Sync from '@/shared/sync'
 
 import MermaidComponent from '@/components/MermaidComponent.vue'
 import EditorComponent from '@/components/EditorComponent.vue'
@@ -25,7 +25,19 @@ export default class Mermaid extends Vue {
   name = 'Mermaid'
   $store!: StoreType
   code = ''
+  editor: any
   mermaidParsingErrors: any[] = []
+  toaster = {
+    enabled: false,
+    text: '',
+  }
+
+  onNotify(text) {
+    this.toaster = {
+      enabled: true,
+      text,
+    }
+  }
   onCodeChanged(code) {
     this.code = code
   }
@@ -37,66 +49,46 @@ export default class Mermaid extends Vue {
     }
   }
 
-  initSync() {
-    const ydoc = new Y.Doc()
-    const yText = ydoc.getText('codemirror')
-    /*const provider = new WebrtcProvider(
-      'wss://demos.yjs.dev',
-
-      ydoc,
-      { password: 'test' },
-    )
-    provider.awareness.setLocalStateField('user', {
-      name: 'Anonymous',
-      color: '#ff0000',
-    })*/
-    //const binding = new CodeMirrorBinding(yText, editor, provider.awareness)
-
-    // provider.connect()
+  onEditorInitialized(editor) {
+    this.editor = editor
   }
-
+  onConnected(options) {
+    this.$store.sync.addMermaidBinding(this.editor, options)
+  }
   mounted() {
     this.$store.title = 'Mermaid Swarm'
-
-    this.initSync()
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-.container {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  top: 0;
-  display: grid;
-  column-gap: 10px;
-  row-gap: 10px;
-  height: 100%;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr 1fr;
+.container
+  position absolute
+  top 0
+  right 0
+  bottom 0
+  left 0
+  display grid
+  height 100%
+  column-gap 10px
+  row-gap 10px
+  grid-template-columns 1fr 1fr
+  grid-template-rows auto 1fr 1fr
 
-  @media (min-width: 1264px) {
-    grid-template-areas: 'room room' 'editor graph' 'editor graph';
-  }
+  @media (min-width: 1264px)
+    grid-template-areas 'room room' 'editor graph' 'editor graph'
 
-  @media (max-width: 1264px) {
-    grid-template-areas: 'room room' 'editor editor' 'graph graph';
-  }
-}
+  @media (max-width: 1264px)
+    grid-template-areas 'room room' 'editor editor' 'graph graph'
 
-.editor {
-  grid-area: editor;
-}
+.editor
+  grid-area editor
 
-.room {
-  grid-area: room;
-}
+.room
+  grid-area room
 
-.graph {
-  grid-area: graph;
-}
+.graph
+  grid-area graph
 </style>
 
 <style lang="stylus"></style>

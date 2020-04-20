@@ -4,7 +4,12 @@
       v-col
         v-card(flat)
           v-card-title Welcome to Smart Collab
-          v-card-text This is a small collection of collaboration tools. 
+          v-card-text 
+            p
+              | This is a small collection of collaboration tools. This is a hobby project. No data is stored (not even cookies ;)). 
+              | All communication is sent encrypted via WebRTC (Peer2Peer). Just a signaling server is used to establish the initial connection between the peers.
+            p
+              | Internet Explorer is not supported. iOS will probably not work.
     v-row 
       v-col
         v-card

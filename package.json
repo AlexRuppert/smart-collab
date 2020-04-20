@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "codemirror": "^5.52.2",
+    "copy-text-to-clipboard": "^2.2.0",
     "file-saver": "^2.0.2",
     "mermaid": "^8.4.8",
     "panzoom": "^9.2.1",
