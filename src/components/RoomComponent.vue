@@ -1,12 +1,5 @@
 <template lang="pug">
   v-card.room-card.py-3
-    //.room-name-container.my-2(v-show='extensionHeight>0')
-      v-text-field.room-name.mr-3(label='Room' :disabled='isCreateMode' v-model='room.name' hide-details clearable)
-      v-text-field.room-name.mr-3(label='Password' ref='password' v-model='room.password' hide-details clearable
-        :type='isCreateMode?"text":"password"' @keydown.enter='connect')
-      v-btn(color='primary' dark height='40' @click='connect')
-        v-icon(left) mdi-lan-connect
-        | Connect
     v-row.mx-3
       v-menu(:close-on-content-click='false' nudge-bottom offset-y transition='scroll-y-transition')
         template(v-slot:activator='{ on }')
@@ -18,7 +11,7 @@
             v-text-field(label='Name' maxlength='18' :color='user.color' v-model='user.name' clearable spellcheck='false')
             .color-selection
               v-btn.ma-1(v-for='color in swatches' :color='color' fab small @click='user.color=color')
-              v-btn.random.ma-1(color='#fff' fab small @click='user.color = generateColor')
+              v-btn.random.ma-1(color='#fff' fab small @click='user.color = generateColor()')
                 v-icon mdi-dice-3-outline
       v-menu(nudge-bottom offset-y transition='scroll-y-transition')
         template(v-slot:activator='{ on }')
@@ -28,7 +21,7 @@
         v-list(max-width='350px' dense)
           v-list-item.pl-2(v-for='(user, index) in users' :key='index' :color='user.color' dense @click='')
             v-list-item-avatar.my-0.mr-1
-              v-avatar(size=24 :color='user.color')
+              v-icon(:color='user.color') mdi-account
             v-list-item-title {{user.name}}
       v-spacer
       .buttons
@@ -47,7 +40,8 @@
                     v-icon mdi-dice-3-outline
               v-row
                 v-col
-                  v-text-field(label='Password' ref='password' v-model='room.password' clearable @keydown.enter='connect("create")')
+                  v-text-field(label='Password' ref='password' v-model='room.password' 
+                    clearable type='password' @keydown.enter='connect("create")')
             v-divider.mt-5
             v-card-actions
               v-spacer
@@ -109,6 +103,8 @@ export default class RoomComponent extends Vue {
   ]
   @Watch('$store.user', { deep: true })
   onUserchanged() {
+    localStorage.userName = this.$store.user.name
+    localStorage.userColor = this.$store.user.color
     this.$store.sync.setUser(this.$store.user)
   }
   dialogs = {
@@ -181,7 +177,10 @@ export default class RoomComponent extends Vue {
   }
 
   initRoom() {
-    this.$store.user.color = this.generateColor()
+    ;(this.$store.user.name =
+      localStorage?.userName ??
+      'Unknown' + Math.floor(Math.random() * 100) + 1),
+      (this.$store.user.color = localStorage?.userColor ?? this.generateColor())
 
     setInterval(() => {
       this.users = this.$store.sync.getUsers()

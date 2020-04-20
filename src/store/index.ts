@@ -4,7 +4,7 @@ const store = {
 
   room: { name: '', password: '', connected: false },
   user: {
-    name: 'Unknown' + Math.floor(Math.random() * 100) + 1,
+    name: 'Unknown',
     color: '#fab',
   },
   sync: new Sync(),
