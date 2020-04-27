@@ -14,10 +14,19 @@ export const routes: Array<RouteConfig> = [
     component: Home,
   },
   {
+    path: '/sticky-notes',
+    name: 'Sticky Notes',
+    meta: {
+      icon: 'mdi-view-grid',
+    },
+    component: () =>
+      import(/* webpackChunkName: "sticky" */ '../views/StickyNotes.vue'),
+  },
+  {
     path: '/mermaid',
     name: 'Mermaid',
     meta: {
-      icon: 'mdi-view-dashboard',
+      icon: 'mdi-graph',
     },
     component: () =>
       import(/* webpackChunkName: "mermaid" */ '../views/Mermaid.vue'),

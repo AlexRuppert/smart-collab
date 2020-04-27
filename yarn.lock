@@ -60,6 +60,178 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
+"@interactjs/actions@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/actions/-/actions-1.9.9.tgz#1eb958dc37a060cd6ca959b6afc64fefd71988d0"
+  integrity sha512-+mb/bTscD1CGjqekQJ6Yf7A2q8K3/JzMfub4HGzi8Ri0cc62iUroScQo/psPae2icQ0gy5nHEiCu2db4EMXxPA==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/arrange@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/arrange/-/arrange-1.9.9.tgz#1179a85f094fe01fb1f45ab04c1e2e4fc4216737"
+  integrity sha512-vVgbOxG1uqzzvw1Sf4eDx/ln63mCyi/Xk0BAzKWGwxLMy5VeGzvJhS6L+EKgI4gNf0vSvkUCjz1VGw6nTprR1g==
+
+"@interactjs/auto-scroll@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/auto-scroll/-/auto-scroll-1.9.9.tgz#37f3fcd0db9024c95b33d572789d0eeff05e91da"
+  integrity sha512-/uoQumGmnwKwOLzrH3tGfLpGax9S1zrxImkiKK+Dl/ItStZoHeXP9H4TzvdC1jiZUxMMsJUMMzky12RsBqF13g==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/auto-start@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/auto-start/-/auto-start-1.9.9.tgz#c7aec6a0b3d7949c5574a49d5f8ca162fea53809"
+  integrity sha512-g2ubcTJy9DAIzhe6fyRyJETJnQTPm3ibx+YzBVPqpcXx1F7nqQIVokrv54muXhCgEzZtQB7Se6gp5dAVl0DhkA==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/clone@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/clone/-/clone-1.9.9.tgz#1f6d708612948b02b97f37ff398686acb46e2365"
+  integrity sha512-Qoeo4jUl0OEPth8aEMMlugByekqrKJwl9sBItvIpQba8m3+6z5/2/ILXJop55Z1EZFAN2uFP/sNqFHVawdh1Ww==
+
+"@interactjs/components@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/components/-/components-1.9.9.tgz#e679734dd759d2bf5a1af52e53006c16716b01df"
+  integrity sha512-Oo+u0Siega9ke6OID/YgIBaNRPN+TBZ/QmfD8HqohrDeMssg5mwDShCpE608K0WLFRp3JODzkl0puYF/g63e4w==
+
+"@interactjs/core@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/core/-/core-1.9.9.tgz#bf2ab0961291f6ff4200bd17d7303b76011700e0"
+  integrity sha512-Jj6AWcIJpGvUkOjGmwo9rdYGoh60OlKlcpLwMnAC1/E6/PCzBgXkHPB4BNYZwRrxJH8QY4TU/vCtZFMZSydxyg==
+
+"@interactjs/dev-tools@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/dev-tools/-/dev-tools-1.9.9.tgz#a160187150265a56ac558086644112336418d7d9"
+  integrity sha512-h8KNxFFRs1MR/GaOMs/R6WqaUUdnCOatEvflRSHIoH2PdDDnu7881v3q6vy/jGeBFU8tZ/0ASxQImiRMJx/tVQ==
+  dependencies:
+    "@interactjs/utils" "1.9.9"
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/feedback@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/feedback/-/feedback-1.9.9.tgz#58c1bc82036d780b9953b5d5fd9f91f140e791c0"
+  integrity sha512-mHgtv3OZg87xImUKJqqDBJZ/tYHjrn71N0glqa2jZpnExtr63g43iWIqIvwJpk775M883WROIGDc+X/4tsVP6Q==
+
+"@interactjs/inertia@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/inertia/-/inertia-1.9.9.tgz#aa07cd17c8c6bef25ddcad9fb4c8a87fa0ec2be5"
+  integrity sha512-rVkZc52gpRG+jgD8xV1WCw5Ktjxbz7PXe49dAjxbocm+6edpjD0Zp7oKeC/IFq+qE5xdgU9BNNe/6yLEdB74KA==
+  dependencies:
+    "@interactjs/offset" "1.9.9"
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/interact@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/interact/-/interact-1.9.9.tgz#028c2eaf5580fcdf30abc58e28dd9a89023f3376"
+  integrity sha512-ntAOE5GL+yaICPkRFmS2p6+7dcydOp42OyRK2Hj+td1DCmo7+dWVJ7sowzcMOCAQQ6bQpk50kaww19jQx1PJcg==
+  dependencies:
+    "@interactjs/core" "1.9.9"
+    "@interactjs/types" "1.9.9"
+    "@interactjs/utils" "1.9.9"
+
+"@interactjs/interactjs@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/interactjs/-/interactjs-1.9.9.tgz#e5459a1f81f7cbecb6a774e7948b2b69c325cfa0"
+  integrity sha512-fQdy6RM2IU1RCZ9XvnEwOmNoRiiIeenXRFu2lgncmL4lfsMP7gbhA1PI0KX2CO1fOVcwbB6E3YHHzgbsFpNcNQ==
+  dependencies:
+    "@interactjs/actions" "1.9.9"
+    "@interactjs/arrange" "1.9.9"
+    "@interactjs/auto-scroll" "1.9.9"
+    "@interactjs/auto-start" "1.9.9"
+    "@interactjs/clone" "1.9.9"
+    "@interactjs/components" "1.9.9"
+    "@interactjs/core" "1.9.9"
+    "@interactjs/dev-tools" "1.9.9"
+    "@interactjs/feedback" "1.9.9"
+    "@interactjs/inertia" "1.9.9"
+    "@interactjs/interact" "1.9.9"
+    "@interactjs/modifiers" "1.9.9"
+    "@interactjs/multi-target" "1.9.9"
+    "@interactjs/offset" "1.9.9"
+    "@interactjs/pointer-events" "1.9.9"
+    "@interactjs/reflow" "1.9.9"
+    "@interactjs/types" "1.9.9"
+    "@interactjs/utils" "1.9.9"
+    "@interactjs/vue" "1.9.9"
+
+"@interactjs/modifiers@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/modifiers/-/modifiers-1.9.9.tgz#c8828cef7c7d8b9687b8f24005fbe45b7236fa3d"
+  integrity sha512-xauU9zjAAZoPWa6vcQ96vFbh39uwT7ZxLZVAiyPAW7bSQRztK/GxUtt2+gwUOrqSKT2Av++9p4BWOlOk5lZxRg==
+  dependencies:
+    "@interactjs/snappers" "1.9.9"
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/multi-target@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/multi-target/-/multi-target-1.9.9.tgz#516d097e2268c6cb1d7c36ed8e0b5856c81c52ed"
+  integrity sha512-BJk5AwIgFN5jOm85LtvucxcIBBpkS8i9ndS4j2td4O0u0rzhXDTVN3XxQnc4rxV9FZfgmZdI4dnyDEnXTFYFsA==
+
+"@interactjs/offset@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/offset/-/offset-1.9.9.tgz#01cb8b0bcc24ffceb0b9d41d1215e86987a5e330"
+  integrity sha512-nMmxzUqmv3InsczdAO6YI5BLUMyc/Gz/41MstJHslLsHjfIVbPUD9ZJbQElcvrnruUoqhXNY/FpRUSyCRqctiQ==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/pointer-events@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/pointer-events/-/pointer-events-1.9.9.tgz#38c33d8549a76c0d32f803c38ff1208d55dd5194"
+  integrity sha512-MtwD4fDQPveofsagav4L4kLj63ZXPCVpPPd0kauD+keMwfm+6z3e80I2KyWqEbabblkH3XKrjEZNGQaPclflCw==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/reflow@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/reflow/-/reflow-1.9.9.tgz#858d4169cf8b4b4ab7b5c9256f76367e584226a7"
+  integrity sha512-Mzixx81kgfveILkhqCkHmSNDvCgg5DKLlVJpTwhh+LfxyWlKSt8bUk9CHYvn09LDsZiodXEimKqyy8QwYcZCVg==
+  optionalDependencies:
+    "@interactjs/interact" "1.9.9"
+
+"@interactjs/snappers@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/snappers/-/snappers-1.9.9.tgz#0326f4821d90cb5a7965a4bcbf3de241f3bc57f2"
+  integrity sha512-7Gcp0VKDTE1W4B4gayOeaUppMgRlLReku9/SBPW+GWTqIPsgHu2ndAAsdKYSksO/v9u+v+Jk0Fm90Pe9zGclzg==
+
+"@interactjs/symbol-tree@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/symbol-tree/-/symbol-tree-1.9.9.tgz#537dfbe2054bbeef4c1586105c65ee60087f8dc3"
+  integrity sha512-esbSprGGuaNLz8OwQKxr0sDSAo14ic0A7eHolODjvdhARREJiZYGLPYNb9h3yZ8TSNLk1Z4RsONxnJwN965irw==
+
+"@interactjs/types@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/types/-/types-1.9.9.tgz#f870dd1d95aeeeb26a1a2b2a45c2ced0135ceebf"
+  integrity sha512-adouBgB8L9RD5HE0efLeYnY7RksXXaHGL3wLZstnDCPIDKpg8PXj6wbR2TovFUP51MlNMmlGFua0xRYIA0tz2g==
+  dependencies:
+    "@interactjs/actions" "1.9.9"
+    "@interactjs/arrange" "1.9.9"
+    "@interactjs/auto-scroll" "1.9.9"
+    "@interactjs/auto-start" "1.9.9"
+    "@interactjs/core" "1.9.9"
+    "@interactjs/dev-tools" "1.9.9"
+    "@interactjs/inertia" "1.9.9"
+    "@interactjs/modifiers" "1.9.9"
+    "@interactjs/pointer-events" "1.9.9"
+    "@interactjs/reflow" "1.9.9"
+    "@interactjs/snappers" "1.9.9"
+    "@interactjs/symbol-tree" "1.9.9"
+    "@interactjs/utils" "1.9.9"
+
+"@interactjs/utils@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/utils/-/utils-1.9.9.tgz#d88e80b29e19686cab64fe1141a20f3b570d5a67"
+  integrity sha512-GegdM3iJHjtH74eNQmZD3lgMe2dl0iTML5tV+Ti8Z6L0AzBtngJXLJ5o/+TjRmqrVeEnvLWwqMvAat74AqjL5g==
+
+"@interactjs/vue@1.9.9":
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/@interactjs/vue/-/vue-1.9.9.tgz#f4fa749e4f74b69ee05fb58c3cadc7a973f87bc1"
+  integrity sha512-UgZJOWfG5dXNMgkPI/j9FECpUADLSOoIX856GLVH2gxLwKcCEMdw1Ro7NwNxvCkl9/+HjtvNXQWTPv8OA6Xu+w==
+
 "@intervolga/optimize-cssnano-plugin@^1.0.5":
   version "1.0.6"
   resolved "https://registry.npmjs.org/@intervolga/optimize-cssnano-plugin/-/optimize-cssnano-plugin-1.0.6.tgz#be7c7846128b88f6a9b1d1261a0ad06eb5c0fdf8"
@@ -810,6 +982,11 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+
+base64-arraybuffer@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.npmjs.org/base64-arraybuffer/-/base64-arraybuffer-0.2.0.tgz#4b944fac0191aa5907afe2d8c999ccc57ce80f45"
+  integrity sha512-7emyCsu1/xiBXgQZrscw/8KPRT44I4Yq9Pe6EGs3aPRTsWuggML1/1DTuZUuIaJPIm1FTDUVXl4x/yW8s0kQDQ==
 
 base64-js@^1.0.2:
   version "1.3.1"
@@ -1772,6 +1949,13 @@ css-declaration-sorter@^4.0.1:
     postcss "^7.0.1"
     timsort "^0.3.0"
 
+css-line-break@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/css-line-break/-/css-line-break-1.1.1.tgz#d5e9bdd297840099eb0503c7310fd34927a026ef"
+  integrity sha512-1feNVaM4Fyzdj4mKPIQNL2n70MmuYzAXZ1aytlROFX1JsOo070OsugwGjj7nl6jnDJWHDM8zRZswkmeYVWZJQA==
+  dependencies:
+    base64-arraybuffer "^0.2.0"
+
 css-loader@^3.4.2:
   version "3.5.1"
   resolved "https://registry.npmjs.org/css-loader/-/css-loader-3.5.1.tgz#db2b2336f4169edb68e6a829ad4fd36552647b77"
@@ -2485,6 +2669,11 @@ dotenv@^8.2.0:
   resolved "https://registry.npmjs.org/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
   integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
+dprop@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/dprop/-/dprop-1.0.0.tgz#5f45a60a60fa3ac1d0f68b6b435831f2ff665468"
+  integrity sha1-X0WmCmD6OsHQ9otrQ1gx8v9mVGg=
+
 duplexer@^0.1.1:
   version "0.1.1"
   resolved "https://registry.npmjs.org/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
@@ -2698,6 +2887,11 @@ eventemitter3@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.0.tgz#d65176163887ee59f386d64c82610b696a4a74eb"
   integrity sha512-qerSRB0p+UDEssxTtm6EDKcE7W4OaoisfIMl4CngyEhjpYglocpNg6UEqCvemdGhosAsg4sO2dXJOdyBifPGCg==
+
+events@^1.0.2:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
+  integrity sha1-nr23Y1rQmccNzEwqH1AEKI6L2SQ=
 
 events@^3.0.0:
   version "3.1.0"
@@ -3204,6 +3398,11 @@ gh-pages@^2.1.0:
     fs-extra "^8.1.0"
     globby "^6.1.0"
 
+gl-vec2@^1.0.0:
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/gl-vec2/-/gl-vec2-1.3.0.tgz#83d472ed46034de8e09cbc857123fb6c81c51199"
+  integrity sha512-YiqaAuNsheWmUV0Sa8k94kBB0D6RWjwZztyO+trEYS8KzJ6OQB/4686gdrf59wld4hHFIvaxynO3nRxpk1Ij/A==
+
 glob-parent@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/glob-parent/-/glob-parent-3.1.0.tgz#9e6af6299d8d3bd2bd40430832bd113df906c5ae"
@@ -3327,6 +3526,13 @@ has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
+
+has-passive-events@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/has-passive-events/-/has-passive-events-1.0.0.tgz#75fc3dc6dada182c58f24ebbdc018276d1ea3515"
+  integrity sha512-2vSj6IeIsgvsRMyeQ0JaCX5Q3lX4zMn5HpoVc7MEhQ6pv8Iq9rsXjsp+E5ZwaT7T0xhMT0KmU8gtt1EFVdbJiw==
+  dependencies:
+    is-browser "^2.0.1"
 
 has-symbols@^1.0.0, has-symbols@^1.0.1:
   version "1.0.1"
@@ -3500,6 +3706,13 @@ html-webpack-plugin@^3.2.0:
     toposort "^1.0.0"
     util.promisify "1.0.0"
 
+html2canvas@^1.0.0-rc.5:
+  version "1.0.0-rc.5"
+  resolved "https://registry.npmjs.org/html2canvas/-/html2canvas-1.0.0-rc.5.tgz#4ee3cac9f6e20a0fa0c2f35a6f99c960ae7ec4c1"
+  integrity sha512-DtNqPxJNXPoTajs+lVQzGS1SULRI4GQaROeU5R41xH8acffHukxRh/NBVcTBsfCkJSkLq91rih5TpbEwUP9yWA==
+  dependencies:
+    css-line-break "1.1.1"
+
 htmlparser2@^3.3.0:
   version "3.10.1"
   resolved "https://registry.npmjs.org/htmlparser2/-/htmlparser2-3.10.1.tgz#bd679dc3f59897b6a34bb10749c855bb53a9392f"
@@ -3634,6 +3847,11 @@ ignore@^4.0.3:
   resolved "https://registry.npmjs.org/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
 
+impetus@^0.8.8:
+  version "0.8.8"
+  resolved "https://registry.npmjs.org/impetus/-/impetus-0.8.8.tgz#8848c56ac8ccdd375fa541bfe62533c3cc472050"
+  integrity sha512-7ejVjFxRAiBlnZQbdNGzUGgxMvLjVke/QNP2TFN/VK8baASsuRiE8YuSbD0qyiU8Pae+w95De4ZYz+rxSo5FJw==
+
 import-cwd@^2.0.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/import-cwd/-/import-cwd-2.1.0.tgz#aa6cf36e722761285cb371ec6519f53e2435b0a9"
@@ -3706,6 +3924,14 @@ inherits@2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
+
+interactjs@^1.9.9:
+  version "1.9.9"
+  resolved "https://registry.npmjs.org/interactjs/-/interactjs-1.9.9.tgz#93914291eeb0edd5e252fb13d6de177ffb7993ab"
+  integrity sha512-4WMas+Ms6qoATdpIFAdXpKRK9AYouNh6LqCq8B+wk0IpkPGoPCFnz3LDOlzhfZghniocVt+uK2FEFHaLwgCHAQ==
+  dependencies:
+    "@interactjs/interactjs" "1.9.9"
+    "@interactjs/types" "1.9.9"
 
 internal-ip@^4.3.0:
   version "4.3.0"
@@ -3792,6 +4018,11 @@ is-binary-path@~2.1.0:
   integrity sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==
   dependencies:
     binary-extensions "^2.0.0"
+
+is-browser@^2.0.1:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/is-browser/-/is-browser-2.1.0.tgz#fc084d59a5fced307d6708c59356bad7007371a9"
+  integrity sha512-F5rTJxDQ2sW81fcfOR1GnCXT6sVJC104fCyfj+mjpwNEwaPYSn5fte5jiHmBg3DHsIoL/l8Kvw5VN5SsTRcRFQ==
 
 is-buffer@^1.1.5:
   version "1.1.6"
@@ -4686,6 +4917,20 @@ moment-mini@^2.22.1:
   resolved "https://registry.npmjs.org/moment-mini/-/moment-mini-2.24.0.tgz#fa68d98f7fe93ae65bf1262f6abb5fb6983d8d18"
   integrity sha512-9ARkWHBs+6YJIvrIp0Ik5tyTTtP9PoV0Ssu2Ocq5y9v8+NOOpWiRshAp8c4rZVWTOe+157on/5G+zj5pwIQFEQ==
 
+mouse-event-offset@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/mouse-event-offset/-/mouse-event-offset-3.0.2.tgz#dfd86a6e248c6ba8cad53b905d5037a2063e9984"
+  integrity sha1-39hqbiSMa6jK1TuQXVA3ogY+mYQ=
+
+mouse-wheel@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/mouse-wheel/-/mouse-wheel-1.2.0.tgz#6d2903b1ea8fb48e61f1b53b9036773f042cdb5c"
+  integrity sha1-bSkDseqPtI5h8bU7kDZ3PwQs21w=
+  dependencies:
+    right-now "^1.0.0"
+    signum "^1.0.0"
+    to-px "^1.0.1"
+
 move-concurrently@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/move-concurrently/-/move-concurrently-1.0.1.tgz#be2c005fda32e0b29af1f05d7c4b33214c701f92"
@@ -5165,6 +5410,18 @@ pako@~1.0.5:
   resolved "https://registry.npmjs.org/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
+pan-zoom@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.npmjs.org/pan-zoom/-/pan-zoom-3.5.0.tgz#0b80b4aa6b46a49e15135c0193ee13cc5fcdf85e"
+  integrity sha512-nF+jzm5PpKwt3vH9pb10HlM6TU0gNsbHRLGnVS6r/JO4xpVTaKeDnNpOJVCwqLXEhymQF619rSfFbrNTycIyPw==
+  dependencies:
+    has-passive-events "^1.0.0"
+    impetus "^0.8.8"
+    mouse-wheel "^1.2.0"
+    raf "^3.4.0"
+    touch-pinch "^1.0.1"
+    touch-position "^2.0.0"
+
 panzoom@^9.2.1:
   version "9.2.1"
   resolved "https://registry.npmjs.org/panzoom/-/panzoom-9.2.1.tgz#0598aa3a08b0d72239b59beb14fc120e80ca2c13"
@@ -5219,6 +5476,11 @@ parse-json@^5.0.0:
     error-ex "^1.3.1"
     json-parse-better-errors "^1.0.1"
     lines-and-columns "^1.1.6"
+
+parse-unit@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/parse-unit/-/parse-unit-1.0.1.tgz#7e1bb6d5bef3874c28e392526a2541170291eecf"
+  integrity sha1-fhu21b7zh0wo45JSaiVBFwKR7s8=
 
 parse5-htmlparser2-tree-adapter@^5.1.1:
   version "5.1.1"
@@ -5994,6 +6256,13 @@ queue-microtask@^1.1.0:
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.1.2.tgz#139bf8186db0c545017ec66c2664ac646d5c571e"
   integrity sha512-F9wwNePtXrzZenAB3ax0Y8TSKGvuB7Qw16J30hspEUTbfUM+H827XyN3rlpwhVmtm5wuZtbKIHjOnwDn7MUxWQ==
 
+raf@^3.4.0:
+  version "3.4.1"
+  resolved "https://registry.npmjs.org/raf/-/raf-3.4.1.tgz#0742e99a4a6552f445d73e3ee0328af0ff1ede39"
+  integrity sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==
+  dependencies:
+    performance-now "^2.1.0"
+
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.3, randombytes@^2.0.5:
   version "2.1.0"
   resolved "https://registry.npmjs.org/randombytes/-/randombytes-2.1.0.tgz#df6f84372f0270dc65cdf6291349ab7a473d4f2a"
@@ -6257,6 +6526,11 @@ right-align@^0.1.1:
   dependencies:
     align-text "^0.1.1"
 
+right-now@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/right-now/-/right-now-1.0.0.tgz#6e89609deebd7dcdaf8daecc9aea39cf585a0918"
+  integrity sha1-bolgne69fc2vja7Mmuo5z1haCRg=
+
 rimraf@^2.5.4, rimraf@^2.6.3, rimraf@^2.7.1:
   version "2.7.1"
   resolved "https://registry.npmjs.org/rimraf/-/rimraf-2.7.1.tgz#35797f13a7fdadc566142c29d4f07ccad483e3ec"
@@ -6516,6 +6790,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.3"
   resolved "https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
   integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
+
+signum@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/signum/-/signum-1.0.0.tgz#74a7d2bf2a20b40eba16a92b152124f1d559fa77"
+  integrity sha1-dKfSvyogtA66FqkrFSEk8dVZ+nc=
 
 simple-peer@^9.6.2:
   version "9.6.2"
@@ -7142,6 +7421,13 @@ to-object-path@^0.3.0:
   dependencies:
     kind-of "^3.0.2"
 
+to-px@^1.0.1:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/to-px/-/to-px-1.1.0.tgz#b6b269ed5db0cc9aefc15272a4c8bcb2ca1e99ca"
+  integrity sha512-bfg3GLYrGoEzrGoE05TAL/Uw+H/qrf2ptr9V3W7U0lkjjyYnIfgxmVLUfhQ1hZpIQwin81uxhDjvUkDYsC0xWw==
+  dependencies:
+    parse-unit "^1.0.1"
+
 to-regex-range@^2.1.0:
   version "2.1.1"
   resolved "https://registry.npmjs.org/to-regex-range/-/to-regex-range-2.1.1.tgz#7c80c17b9dfebe599e27367e0d4dd5590141db38"
@@ -7181,6 +7467,24 @@ toposort@^1.0.0:
   version "1.0.7"
   resolved "https://registry.npmjs.org/toposort/-/toposort-1.0.7.tgz#2e68442d9f64ec720b8cc89e6443ac6caa950029"
   integrity sha1-LmhELZ9k7HILjMieZEOsbKqVACk=
+
+touch-pinch@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/touch-pinch/-/touch-pinch-1.0.1.tgz#52f2aeee263139730570d0ccdf8d443a92b3b36d"
+  integrity sha1-UvKu7iYxOXMFcNDM341EOpKzs20=
+  dependencies:
+    dprop "^1.0.0"
+    events "^1.0.2"
+    gl-vec2 "^1.0.0"
+    mouse-event-offset "^3.0.2"
+
+touch-position@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/touch-position/-/touch-position-2.0.0.tgz#dba7cc7f6e8fa19288152d229e15b7dc5c824286"
+  integrity sha1-26fMf26PoZKIFS0inhW33FyCQoY=
+  dependencies:
+    events "^1.0.2"
+    mouse-event-offset "^3.0.2"
 
 tough-cookie@^2.3.3, tough-cookie@~2.5.0:
   version "2.5.0"

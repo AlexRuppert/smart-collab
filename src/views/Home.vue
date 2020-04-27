@@ -13,6 +13,13 @@
     v-row 
       v-col
         v-card
+          v-card-title Sticky Notes
+          v-card-text Create sticky notes on a shared board. 
+          v-card-actions
+            v-btn(text color='primary' to='/sticky-notes') Open
+    v-row 
+      v-col
+        v-card
           v-card-title Mermaid Swarm
           v-card-text Create diagramms collaboratively using 
             a(href='https://github.com/mermaid-js/mermaid#readme') mermaid
