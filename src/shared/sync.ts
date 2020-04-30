@@ -32,7 +32,7 @@ export default class Sync {
     this.ydoc = new Y.Doc()
     this.provider = new WebrtcProvider(room.name, this.ydoc, {
       password: room.password,
-      //signaling: ['ws://localhost:4444'],
+      // signaling: ['ws://localhost:4444'],
     })
     this.provider.on('connect', () => console.log('asd'))
     this.addBindings()
@@ -56,11 +56,98 @@ export default class Sync {
       for (let binding in this.bindingsToConnect) {
         if (typeof this.bindingsToConnect[binding] === 'function') {
           this.bindings[binding] = this.bindingsToConnect[binding]()
-          console.log('mermaid binding')
+          console.log('binding created')
         }
         delete this.bindingsToConnect[binding]
       }
     }
+  }
+  addStickyNotesBinding(networkUpdate, localUpdateRegister, options: any) {
+    this.bindings.stickyNotes?.destroy()
+    //window.aw = this.provider.awareness
+    this.bindingsToConnect.stickyNotes = () => {
+      try {
+        const notes = this.ydoc.getMap('notes')
+        const pointers = this.ydoc.getMap('pointers')
+        const clientId = this.ydoc.clientID
+
+        const getUser = clientId =>
+          this.provider?.awareness.getStates().get(+clientId)?.user ?? {
+            name: 'Unknown',
+            color: '#000',
+          }
+
+        const updateFunction = event => {
+          //console.dir(this.provider?.awareness.getStates().get(clientId))
+          switch (event.type) {
+            case 'create':
+              notes.set(event.note.id, event.note)
+              break
+            case 'delete':
+              notes.delete(event.note.id)
+              break
+            case 'input':
+            case 'dragEnd':
+              notes.set(event.note.id, event.note)
+              break
+            case 'move':
+              notes.set(event.note.id, event.note)
+              break
+            case 'pointerMove':
+              pointers.set(clientId.toString(), event.pointer)
+              break
+            default:
+              break
+          }
+        }
+        pointers.observe(event => {
+          if (event.transaction.local) return
+          //@ts-ignore
+          event.changes.keys.forEach((value, key) => {
+            networkUpdate({
+              type: 'pointerMove',
+              pointer: {
+                id: key,
+                user: getUser(key),
+                position: pointers.get(key).position,
+              },
+            })
+          })
+        })
+        notes.observe(event => {
+          if (event.transaction.local) return
+
+          //@ts-ignore
+          event.changes.keys.forEach((value, key) => {
+            //console.log(value, notes.get(key))
+            if (value.action === 'add') {
+              networkUpdate({ type: 'create', note: notes.get(key) })
+            } else if (value.action === 'delete') {
+              networkUpdate({ type: 'delete', note: { id: key } })
+            } else if (value.action === 'update') {
+              const note = notes.get(key)
+              networkUpdate({ type: 'input', note })
+              networkUpdate({ type: 'dragEnd', note })
+            }
+          })
+        })
+
+        localUpdateRegister(updateFunction)
+      } catch (error) {
+        console.error(error)
+      }
+
+      return null
+    }
+
+    this.addBindings()
+  }
+  removeStickyNotesBinding() {
+    this.bindingsToConnect.stickyNotes = null
+    try {
+      this.bindings.stickyNotes?.destroy()
+      this.bindings.stickyNotes = null
+    } catch {}
   }
   addMermaidBinding(editor: any, options: any) {
     this.bindings.mermaid?.destroy()

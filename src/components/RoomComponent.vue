@@ -1,7 +1,7 @@
 <template lang="pug">
   v-card.room-card.py-3
     v-row.mx-3
-      v-menu(:close-on-content-click='false' nudge-bottom offset-y transition='scroll-y-transition')
+      v-menu(:close-on-content-click='false' nudge-bottom offset-y transition='scroll-y-transition' z-index='99999999')
         template(v-slot:activator='{ on }')
           v-btn.mr-3.text-none(dark :color='user.color' v-on='on' max-width='200px' depressed)
             v-icon(left) mdi-account
@@ -13,7 +13,7 @@
               v-btn.ma-1(v-for='color in swatches' :color='color' fab small @click='user.color=color')
               v-btn.random.ma-1(color='#fff' fab small @click='user.color = generateColor()')
                 v-icon mdi-dice-3-outline
-      v-menu(nudge-bottom offset-y transition='scroll-y-transition')
+      v-menu(nudge-bottom offset-y transition='scroll-y-transition' z-index='99999999')
         template(v-slot:activator='{ on }')
           v-btn.text-none(v-show='room.connected' text v-on='on' max-width='200px')
             v-icon(left) mdi-account-group
@@ -25,7 +25,7 @@
             v-list-item-title {{user.name}}
       v-spacer
       .buttons
-        v-dialog(v-model='dialogs.create' max-width=500)
+        v-dialog(v-model='dialogs.create' max-width=500 z-index='99999999')
           template(v-slot:activator='{ on }')
             v-btn.mr-3(v-show='!room.connected' @click='createMode' text color='primary')
               v-icon(left) mdi-account-group-outline
@@ -47,7 +47,7 @@
               v-spacer
               v-btn(text @click='cancelMode') Cancel
               v-btn(color='primary' text @click='connect("create")') Connect
-        v-dialog(v-model='dialogs.join' max-width=500)
+        v-dialog(v-model='dialogs.join' max-width=500 z-index='99999999')
           template(v-slot:activator='{ on }')
             v-btn.mr-3(v-show='!room.connected' @click='joinMode' text color='primary')
               v-icon(left) mdi-location-enter
@@ -126,7 +126,9 @@ export default class RoomComponent extends Vue {
   joinMode() {
     this.dialogs.join = true
     this.dialogs.create = false
+    //TODO
     this.focusPassword()
+    //this.connect('join')
   }
   focusPassword() {
     setTimeout(() => {

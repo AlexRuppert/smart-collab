@@ -1,10 +1,10 @@
 <template lang="pug">
-  .note(ref='root' :data-id='id' :style='noteStyle' :class='noteClass' @dblclick.stop.prevent='onEditStart' )
+  .note(ref='root' :data-id='id' :style='noteStyle' :class='noteClass')
     .shadow(data-html2canvas-ignore)
     .paper
     .text-container
       .text(ref='text' :style='textStyle' :contenteditable='isEdited' spellcheck='false'
-        @focusout='onEditEnd' @focus='onFocus' @keydown.enter='onEnter') {{innerValue}}
+        @focusout='onEditEnd' @focus='onFocus' @keydown.enter='onEnter') {{valueText}}
       
 </template>
 <script lang="ts">
@@ -30,6 +30,15 @@ export enum NoteTypes {
 export default class Note extends Vue {
   name = 'Note'
 
+  innerValue = ''
+  innerPosition = { x: 0, y: 0, rotation: 0 }
+  isDragged = false
+  isHold = false
+  isEdited = true
+  isVisible = false
+  interactInstance!: any
+
+  rotationSmoother = [] as number[]
   @Prop({
     default: 1,
   })
@@ -65,7 +74,7 @@ export default class Note extends Vue {
   color!: NoteColors
 
   @Prop({
-    default: '',
+    default: { x: 0, y: 0, rotation: 0 },
   })
   position!: { x: number; y: number; rotation: number }
 
@@ -78,19 +87,17 @@ export default class Note extends Vue {
     this.innerValue = this.value
   }
 
+  //hack, as sometimes the value is not reactively updated from network, no idea why...
+  get valueText() {
+    if (this.value != this.innerValue) return this.value
+    return this.innerValue
+  }
+
   @Watch('position')
   onPositionChanged() {
     this.innerPosition = this.position
   }
 
-  innerValue = ''
-  innerPosition = { x: 0, y: 0, rotation: 0 }
-  isDragged = false
-  isHold = false
-  isEdited = true
-  interactInstance!: any
-
-  rotationSmoother = [] as number[]
   onEditStart() {
     this.isEdited = true
 
@@ -109,10 +116,14 @@ export default class Note extends Vue {
     this.isEdited = false
     this.innerValue = event.target.innerText.trim().replace(/\s+/g, ' ')
     const text = this.$refs.text as HTMLElement
-    while (text.childNodes.length > 1) {
-      text.removeChild(text.childNodes[0])
-    }
+    let contentChild
+
+    Array.from(text.childNodes)
+      .filter(c => c.nodeType === 3 && !c.nodeValue?.trim())
+      .forEach(c => text.removeChild(c))
+
     this.$emit('input', this.innerValue)
+    this.$emit('noteUpdate', { type: 'input', note: this })
   }
 
   get noteClass() {
@@ -126,6 +137,14 @@ export default class Note extends Vue {
       classes.push('edited')
     } else {
       classes.push('movable')
+    }
+
+    if (this.isDragged) {
+      classes.push('dragged')
+    }
+
+    if (this.isVisible) {
+      classes.push('visible')
     }
     if (this.isOverBin) {
       classes.push('crumbled')
@@ -143,7 +162,11 @@ export default class Note extends Vue {
     if (this.isEdited) {
       fontSize = 20
     } else {
-      fontSize = clamp(15, 150 / (maxLineLength * 0.8), 90)
+      fontSize = 150 / (maxLineLength * 0.8)
+      if (lineCount >= maxLineLength) {
+        fontSize = 150 / (lineCount * 0.5)
+      }
+      fontSize = clamp(15, fontSize, 90)
     }
     const lineHeight = clamp(15, fontSize * 1.1, 90)
     return {
@@ -163,6 +186,29 @@ export default class Note extends Vue {
     this.innerPosition = coordinates
   }
 
+  fadeIn() {
+    if (this.type === NoteTypes.default) {
+      const prePostition = { ...this.innerPosition }
+      this.isDragged = true
+      setTimeout(() => {
+        let rotation = prePostition.rotation - 180
+        let x = prePostition.x - 100
+        let y = prePostition.y - 150
+        this.innerPosition = { x, y, rotation }
+        this.isVisible = true
+      }, 1)
+      setTimeout(() => {
+        this.isDragged = false
+
+        let rotation = prePostition.rotation
+        let x = prePostition.x
+        let y = prePostition.y
+        this.innerPosition = { x, y, rotation }
+      }, 20)
+    } else {
+      this.isVisible = true
+    }
+  }
   mounted() {
     this.onValueChanged()
     this.isEdited = false
@@ -173,7 +219,7 @@ export default class Note extends Vue {
       .draggable({
         onstart: () => {
           this.isDragged = true
-          this.$emit('dragStart', this)
+          this.$emit('noteUpdate', { type: 'dragStart', note: this })
         },
         onmove: event => {
           const maxRotation = 20
@@ -202,15 +248,28 @@ export default class Note extends Vue {
             this.rotationSmoother.reduce((acc, val) => acc + val, 0) /
             this.rotationSmoother.length
           if (!this.isEdited && this.type !== NoteTypes.noteSelection) {
+            this.$emit('noteUpdate', { type: 'move', note: this })
             this.setPosition({ x, y, rotation: averageRotation })
-            this.$emit('moved', this)
           }
         },
         onend: () => {
           this.isDragged = false
-          this.$emit('dragEnd', this)
+          this.$emit('noteUpdate', { type: 'dragEnd', note: this })
         },
       })
+      .on('doubletap', event => {
+        this.isEdited = true
+
+        const text = this.$refs.text as HTMLElement
+        setTimeout(() => {
+          text.focus()
+        }, 10)
+      })
+      .on('tap', event => {
+        this.$emit('noteUpdate', { type: 'tapped', note: this })
+      })
+
+    this.fadeIn()
   }
 
   beforeDestroy() {
@@ -250,9 +309,17 @@ generateColorGradients(classname)
   border 1px solid transparent
   border-radius 2px
   background transparent
+  opacity 0
+  transition transform 0.15s linear
   transform-origin center center
   user-select none
   will-change transform
+
+  &.visible
+    opacity 1
+
+  &.dragged
+    transition none
 
   & .shadow
     position absolute
@@ -287,7 +354,7 @@ generateColorGradients(classname)
     width 100%
     height 100%
     border-radius 2px
-    transition all 0.15s ease-out
+    transition transform 0.15s ease-out
     transform-origin top
 
   &:hover .paper

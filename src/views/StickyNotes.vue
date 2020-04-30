@@ -1,7 +1,7 @@
 <template lang="pug">
   v-container.container(fluid)
     RoomComponent.room(@connected='onConnected' @notify='onNotify')
-    StickyNotesComponent
+    StickyNotesComponent(ref='stickyNotes' @update='onLocalUpdate')
     v-snackbar(v-model='toaster.enabled' top :timeout='2000') {{ toaster.text }}
       v-btn(dark icon @click='toaster.enabled = false') 
         v-icon mdi-close
@@ -34,8 +34,31 @@ export default class StickyNotes extends Vue {
       text,
     }
   }
+  localUpdateObject = {
+    update: event => {},
+  }
 
-  onConnected(options) {}
+  onNetworkUpdate(event) {
+    const stickyNotes = this.$refs.stickyNotes as StickyNotesComponent
+    stickyNotes!.update(event)
+  }
+  onLocalUpdate(event) {
+    if (this.localUpdateObject) this.localUpdateObject.update(event)
+  }
+  onConnected(options) {
+    const stickyNotes = this.$refs.stickyNotes as StickyNotesComponent
+    let initialNotes
+    if (!options.created) {
+      console.log('clear')
+      stickyNotes.clearNotes()
+    }
+
+    this.$store.sync.addStickyNotesBinding(
+      this.onNetworkUpdate,
+      updateFn => (this.localUpdateObject.update = updateFn),
+      stickyNotes.notes,
+    )
+  }
   mounted() {
     this.$store.title = 'Sticky Notes'
   }

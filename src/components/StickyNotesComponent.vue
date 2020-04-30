@@ -14,23 +14,26 @@
           v-icon mdi-camera
     v-card-text.canvas-container.pb-0(ref='canvasContainer')
       .canvas(ref='canvas' data-pan :style='canvasStyle')
-        .note-selection(:class='{ selected: isNoteSelecting}' data-html2canvas-ignore)
-          Note(v-for='note in noteSelection' :key='note.id' :id='note.id' :type='note.type' :color='note.color'
-            :zIndex='note.zIndex' :position='note.position'
-            @dragStart='onNoteSelectionDragStart' @dragEnd='onNoteSelectionDragEnd')
         Note(v-for='note in notes' :key='note.id' :id='note.id' :type='note.type' v-model='note.value' :color='note.color'
-          :zIndex='note.zIndex' :isOverBin='note.isOverBin' :dimensions='canvasDimensions' :zoomScale='canvas.scale' :position='note.position' @moved='onNoteMoved'
-          @dragStart='onNoteDragStart' @dragEnd='onNoteDragStop')
+          :zIndex='note.zIndex' :isOverBin='note.isOverBin' :dimensions='canvasDimensions' :zoomScale='canvas.scale' :position='note.position'
+          @noteUpdate='onNoteUpdate')
+      .note-selection(data-html2canvas-ignore)
+        Note(v-for='note in noteSelection' :key='note.id' :id='note.id' :type='note.type' :color='note.color'
+          :zIndex='note.zIndex' :position='note.position'
+          @noteUpdate='onNoteSelectionUpdate')
       .bin-container(ref='bin' :class='binClass' data-html2canvas-ignore)
         v-icon.bin.ui-element {{isOverBin?'mdi-delete-empty':'mdi-delete'}}
+      .pointer-layer
+        PointerIndicator(v-for='pointer in pointers' :position='pointer.position' :user='pointer.user')
           
         
-    input(ref='fileElement' type='file' style='display:none' @change='importContent')
+    //input(ref='fileElement' type='file' style='display:none' @change='importContent')
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import FileSaver from 'file-saver'
 import Note from '@/components/Note.vue'
+import PointerIndicator from '@/components/PointerIndicator.vue'
 import { NoteColors, NoteTypes } from '@/components/Note.vue'
 import interact from 'interactjs'
 import { generateUID, clamp } from '@/shared/utils.ts'
@@ -53,9 +56,11 @@ type NoteParameters = {
 }
 
 type NoteConfig = {
+  id?: string
   value?: string
   color?: NoteColors
   type?: NoteTypes
+  zIndex?: number
   position?: {
     x?: number
     y?: number
@@ -63,15 +68,17 @@ type NoteConfig = {
   }
 }
 @Component({
-  components: { Note },
+  components: { Note, PointerIndicator },
 })
 export default class StickyNotesComponent extends Vue {
   name = 'StickyNotesComponent'
 
   notes = [] as NoteParameters[]
   noteSelection = [] as NoteParameters[]
+  pointers = [
+    // { position: { x: 150, y: 150 }, user: { name: 'Alex', color: '#4e6fa3' } },
+  ] as any
   isOverBin = false
-  isNoteSelecting = false
   canvasDimensions = 3000
   zoom = {
     instance: null as any | null,
@@ -85,11 +92,84 @@ export default class StickyNotesComponent extends Vue {
       smoothScroll: false,
     },
   }
+  canvas = { x: 0, y: 0, scale: 1 }
 
+  get binClass() {
+    const classes = [] as string[]
+
+    if (this.isOverBin) {
+      classes.push('drag-over')
+    }
+    return classes
+  }
+  get highestZindex() {
+    return this.notes.reduce((acc, val) => Math.max(acc, val.zIndex), 0)
+  }
+  get canvasStyle() {
+    return {
+      transform: `translate3D(${this.canvas.x}px, ${this.canvas.y}px, 0) scale(${this.canvas.scale}, ${this.canvas.scale})`,
+      transformOrigin: `0 0 0`,
+    }
+  }
+
+  onNoteUpdate(event) {
+    const foundNote = this.findNote(event.note.id)
+
+    const throttledMove = _.throttle((note, position) => {
+      this.$emit('update', {
+        type: 'move',
+        note: { ...note, position },
+      })
+    }, 15)
+    if (!foundNote) return
+    switch (event.type) {
+      case 'input':
+        this.$emit('update', {
+          type: 'input',
+          note: foundNote,
+        })
+        break
+      case 'dragStart':
+        this.updateNoteToTop(foundNote)
+        break
+      case 'dragEnd':
+        foundNote.position = event.note.innerPosition
+
+        this.$emit('update', {
+          type: 'dragEnd',
+          note: foundNote,
+        })
+        break
+      case 'tapped':
+        break
+      case 'move':
+        throttledMove(foundNote, event.note.innerPosition)
+        break
+      default:
+        break
+    }
+  }
+  onNoteSelectionUpdate(event) {
+    switch (event.type) {
+      case 'input':
+        break
+      case 'dragStart':
+        this.cloneNoteFromSelected(event.note)
+        break
+      case 'dragEnd':
+        break
+      case 'tapped':
+        this.cloneNoteFromSelected(event.note)
+        break
+
+      default:
+        break
+    }
+  }
   findNote(id): NoteParameters | undefined {
     return this.notes.find(note => note.id === id)
   }
-  createNote(options: NoteConfig) {
+  createNote(options: NoteConfig, network = false) {
     const defaultOptions = {
       value: '',
       color: NoteColors.yellow,
@@ -103,102 +183,125 @@ export default class StickyNotesComponent extends Vue {
 
     options = _.defaultsDeep(options, defaultOptions)
     const note = {
-      id: generateUID(),
+      id: network ? options.id : generateUID(),
       value: options.value,
       color: options.color,
-      zIndex: this.highestZindex,
+      zIndex: network ? options.zIndex : this.highestZindex + 1,
       isOverBin: false,
       position: options.position,
     }
 
     this.notes.push(note as NoteParameters)
 
+    if (!network) {
+      this.$emit('update', {
+        type: 'create',
+        note: note,
+      })
+    }
     return note
   }
 
-  deleteNote(id) {
+  deleteNote(id, network = false) {
+    const foundNote = this.findNote(id)
+    if (!network) {
+      this.$emit('update', {
+        type: 'delete',
+        note: foundNote,
+      })
+    }
     this.notes = this.notes.filter(note => note.id !== id)
   }
+  clearNotes() {
+    this.notes = []
+  }
 
-  get binClass() {
-    const classes = [] as string[]
-
-    if (this.isOverBin) {
-      classes.push('drag-over')
+  updateNoteToTop(note) {
+    const highestZindex = this.highestZindex
+    if (note.zIndex < highestZindex) {
+      note.zIndex = highestZindex + 1
     }
-    return classes
   }
-  get highestZindex() {
-    return this.notes.reduce((acc, val) => Math.max(acc, val.zIndex), 0) + 1
+
+  update(event) {
+    let foundNote
+    switch (event.type) {
+      case 'create':
+        this.createNote(event.note, true)
+        break
+      case 'delete':
+        this.deleteNote(event.note.id, true)
+        break
+      case 'input':
+        foundNote = this.findNote(event.note.id)
+
+        if (foundNote) foundNote.value = event.note.value
+        break
+      case 'dragEnd':
+        foundNote = this.findNote(event.note.id)
+        if (foundNote) {
+          this.updateNoteToTop(foundNote)
+          foundNote.position = event.note.position
+        }
+        break
+      case 'pointerMove':
+        let localPointer = this.pointers.find(p => p.id === event.pointer.id)
+        if (!localPointer) {
+          localPointer = { ...event.pointer }
+          this.pointers.push(localPointer)
+        }
+
+        localPointer.user = event.pointer.user
+        localPointer.position = {
+          x: event.pointer.position.x * this.canvas.scale + this.canvas.x,
+          y: event.pointer.position.y * this.canvas.scale + this.canvas.y,
+        }
+
+        break
+      default:
+        break
+    }
   }
-  onNoteSelectionDragStart(note) {
-    this.isNoteSelecting = true
+  cloneNoteFromSelected(note) {
     const newNote = this.createNote({
       color: note.color,
-      position: { x: note.position.x, y: 0 },
+      position: {
+        x: (-this.canvas.x + note.position.x) / this.canvas.scale,
+        y: (-this.canvas.y + 50) / this.canvas.scale,
+        rotation: 0,
+      },
     })
   }
-  onNoteSelectionDragEnd(note) {
-    this.isNoteSelecting = false
-  }
-  onNoteDragStart(note) {
-    const foundNote = this.findNote(note.id)
-    if (!foundNote) return
 
-    const highestZindex = this.highestZindex
-    if (foundNote.zIndex + 1 < highestZindex) {
-      foundNote.zIndex = highestZindex
-    }
-  }
-  onNoteMoved(note) {
-    /*const foundNote = this.findNote(note.id)
-    if (foundNote) foundNote.position = note.innerPosition*/
-  }
-  onNoteDragStop(note) {
-    const foundNote = this.findNote(note.id)
-    if (foundNote) foundNote.position = note.innerPosition
-  }
-  importContent(event) {
-    const files = event.srcElement.files
-
-    if (files && files[0]) {
-      const reader = new FileReader()
-      reader.onload = data => {
-        const fileContent = data?.target?.result?.toString()
-        if (fileContent != undefined) {
-          //this.value = fileContent
-          //this.editor.instance.doc.setValue(this.value)
-        }
-        ;(this.$refs.fileElement as HTMLInputElement).value = ''
-      }
-      reader.readAsText(files[0])
-    }
-  }
-  exportContent() {
-    const fileName = `${new Date().toISOString().substr(0, 10)} - export.sticky`
-    let blob = new Blob(['test'], {
-      type: 'text/plain;charset=utf-8',
-    })
-    FileSaver.saveAs(blob, fileName)
-  }
-
-  get canvasStyle() {
-    return {
-      transform: `translate3D(${this.canvas.x}px, ${this.canvas.y}px, 0) scale(${this.canvas.scale}, ${this.canvas.scale})`,
-      transformOrigin: `0 0 0`,
-    }
-  }
   zoomReset() {
     this.canvas = { x: 0, y: 0, scale: 1 }
   }
-  canvas = { x: 0, y: 0, scale: 1 }
-  applyZoom() {
+
+  applyPointerIndicators() {
+    const throttledMove = _.throttle(pointer => {
+      this.$emit('update', {
+        type: 'pointerMove',
+        pointer,
+      })
+    }, 15)
+    const canvas = this.$refs.canvas as HTMLElement
+    canvas.addEventListener('mousemove', e => {
+      let mouseX = e.pageX - this.dimensions.viewPort.offsetX
+      let mouseY = e.pageY - this.dimensions.viewPort.offsetY
+
+      let x = -this.canvas.x + mouseX / this.canvas.scale
+      let y = -this.canvas.y + mouseY / this.canvas.scale
+      throttledMove({ position: { x, y } })
+    })
+  }
+  dimensions
+  updateDimensions() {
     const canvas = this.$refs.canvas as HTMLElement
     const canvasContainer = this.$refs.canvasContainer as HTMLElement
+    let canvasBounds
 
-    //todo resize events
-    const canvasBounds = canvasContainer.getBoundingClientRect()
-    const dimensions = {
+    canvasBounds = canvasContainer.getBoundingClientRect()
+    this.dimensions = {
       canvas: {
         width: canvas.offsetWidth,
         height: canvas.offsetHeight,
@@ -210,6 +313,10 @@ export default class StickyNotesComponent extends Vue {
         height: canvasContainer.offsetHeight,
       },
     }
+  }
+
+  applyZoom() {
+    const canvas = this.$refs.canvas as HTMLElement
 
     const ensureBounds = (dimensions, { x, y, scale }) => {
       if (x > 0) x = 0
@@ -232,8 +339,8 @@ export default class StickyNotesComponent extends Vue {
         1.5,
       )
 
-      let mouseX = e.pageX - dimensions.viewPort.offsetX
-      let mouseY = e.pageY - dimensions.viewPort.offsetY
+      let mouseX = e.pageX - this.dimensions.viewPort.offsetX
+      let mouseY = e.pageY - this.dimensions.viewPort.offsetY
 
       let targetX = (mouseX - this.canvas.x) / currentScale
       let targetY = (mouseY - this.canvas.y) / currentScale
@@ -241,12 +348,13 @@ export default class StickyNotesComponent extends Vue {
       let x = -targetX * scale + mouseX
       let y = -targetY * scale + mouseY
 
-      this.canvas = ensureBounds(dimensions, { x, y, scale })
+      this.canvas = ensureBounds(this.dimensions, { x, y, scale })
     })
 
     this.zoom.instance = panzoom(canvas, e => {
       if (e.dz !== 0) return
       if (e.srcElement.dataset.pan === undefined) {
+        return
         e.dx = 0
         e.dy = 0
       }
@@ -254,7 +362,11 @@ export default class StickyNotesComponent extends Vue {
       let x = this.canvas.x + e.dx
       let y = this.canvas.y + e.dy
 
-      this.canvas = ensureBounds(dimensions, { x, y, scale: this.canvas.scale })
+      this.canvas = ensureBounds(this.dimensions, {
+        x,
+        y,
+        scale: this.canvas.scale,
+      })
     })
   }
 
@@ -271,7 +383,7 @@ export default class StickyNotesComponent extends Vue {
         value: '',
         color,
         type: NoteTypes.noteSelection,
-        zIndex: 999999,
+        zIndex: 199,
         isOverBin: false,
         position: {
           x: offset - (60 + Math.random() * 7) * index,
@@ -314,10 +426,15 @@ export default class StickyNotesComponent extends Vue {
   }
 
   mounted() {
+    this.updateDimensions()
+    window.addEventListener('resize', this.updateDimensions)
     this.createNoteSelection()
-    this.createNote({ position: { x: 200, y: 200 } })
+    /*this.createNote({
+      position: { x: 80, y: 50 },
+      value: 'Hello',
+    })*/
     this.applyZoom()
-
+    this.applyPointerIndicators()
     const bin = this.$refs.bin as HTMLElement
     interact(bin)
       .dropzone({
@@ -331,8 +448,6 @@ export default class StickyNotesComponent extends Vue {
       .on('dragenter', event => {
         this.isOverBin = true
         this.isNoteOverBin(event.relatedTarget.dataset.id, true)
-
-        console.log('a')
       })
       .on('dragleave', event => {
         this.isOverBin = false
@@ -358,9 +473,18 @@ springy = cubic-bezier(0.35, 0.35, 0.57, 1.54)
   height 3000px
   background url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZAQMAAAD+JxcgAAAABlBMVEX////z8vfnE/p3AAAAFElEQVQI12P4//9/A0MDAxDQnwAAjsgPfrGbtywAAAAASUVORK5CYII=') repeat
 
-  .note-selection
-    &.selected
-      pointer-events none
+.note-selection
+  position absolute
+  top 0
+  left 0
+
+.pointer-layer
+  position absolute
+  top 0
+  right 0
+  bottom 0
+  left 0
+  pointer-events none
 
 .bin-container
   position absolute
@@ -372,12 +496,12 @@ springy = cubic-bezier(0.35, 0.35, 0.57, 1.54)
   align-items center
   width 150px
   height 150px
+  pointer-events none
 
   .bin
     font-size 65px
     opacity 0.1
     transition all 0.25s springy
-    pointer-events none
 
   &.drag-over
     .bin
