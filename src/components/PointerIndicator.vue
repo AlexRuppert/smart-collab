@@ -35,15 +35,17 @@ export default class PointerIndicator extends Vue {
 }
 </script>
 <style lang="stylus" scoped>
-dim = 26px
-thickness = 6px
+dim = 20px
+thickness = 5px
 
 .pointer
   position absolute
+  margin-top - dim * 0.5
+  margin-left - dim * 0.5
   width dim
   height dim
   border-radius dim
-  filter drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.25))
+  filter drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.35))
   transition transform 0.1s linear
   user-select none
 

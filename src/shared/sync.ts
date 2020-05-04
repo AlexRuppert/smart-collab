@@ -32,7 +32,7 @@ export default class Sync {
     this.ydoc = new Y.Doc()
     this.provider = new WebrtcProvider(room.name, this.ydoc, {
       password: room.password,
-      // signaling: ['ws://localhost:4444'],
+      signaling: ['ws://localhost:4444'],
     })
     this.provider.on('connect', () => console.log('asd'))
     this.addBindings()
@@ -88,9 +88,8 @@ export default class Sync {
               break
             case 'input':
             case 'dragEnd':
-              notes.set(event.note.id, event.note)
-              break
             case 'move':
+            case 'color':
               notes.set(event.note.id, event.note)
               break
             case 'pointerMove':
@@ -126,8 +125,9 @@ export default class Sync {
               networkUpdate({ type: 'delete', note: { id: key } })
             } else if (value.action === 'update') {
               const note = notes.get(key)
-              networkUpdate({ type: 'input', note })
-              networkUpdate({ type: 'dragEnd', note })
+              networkUpdate({ type: 'update', note })
+              // networkUpdate({ type: 'input', note })
+              //networkUpdate({ type: 'dragEnd', note })
             }
           })
         })
