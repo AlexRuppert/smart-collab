@@ -2,6 +2,19 @@
   v-card
     v-card-title.px-0.py-0
       v-toolbar(dense flat)
+        v-btn(icon :style='handStyle' color='#333' @click='selectHand')
+          v-icon mdi-hand-right
+        v-menu(nudge-bottom offset-y transition='scroll-y-transition' z-index='99999999')
+          template(v-slot:activator='{ on }')
+            v-btn(icon v-on='on' :color='pencilColor' :style='pencilStyle')
+              v-icon mdi-lead-pencil
+          v-card.user-config-menu
+            v-card-text
+              .color-selection
+                v-btn.pa-0.ma-1(v-for='swatch in pencilColors' :color='swatch.color' fab small @click='selectPencil(swatch)')
+                v-btn.pa-0.ma-1(fab small @click='selectPencil()')
+                  v-icon mdi-pencil-off
+                
         v-menu(nudge-bottom offset-y transition='scroll-y-transition' z-index='99999999')
           template(v-slot:activator='{ on }')
             v-btn(icon v-on='on' :color='bucketColor' :style='bucketStyle')
@@ -9,9 +22,8 @@
           v-card.user-config-menu
             v-card-text
               .color-selection
-                v-btn.pa-0.ma-1(v-for='swatch in colorSwatches' :color='swatch.color' style='min-width: 38px;' @click='selectBucket(swatch)')
-        v-btn(icon v-show='tools.bucket.active' @click='cancelBucket')
-          v-icon mdi-close
+                v-btn.pa-0.ma-1(v-for='swatch in bucketColors' :color='swatch.color' style='min-width: 38px;' @click='selectBucket(swatch)')
+        
         v-spacer
         v-dialog(v-model='dialogs.clearNotes' max-width='290')
           template(v-slot:activator='{ on }')
@@ -30,15 +42,17 @@
           v-icon mdi-cloud-upload-outline
         //v-btn(icon @click='')
           v-icon mdi-cloud-download-outline
-        v-btn(color='primary' icon @click='snapshot')
+        v-btn(color='primary' icon @click='snapshot' :loading='tools.snapshot.active')
           v-icon mdi-camera
     v-card-text.canvas-container.pb-0(ref='canvasContainer' v-resize:debounce='updateDimensions')
       .canvas(ref='canvas' data-pan :style='canvasStyle')
-        Note(v-for='note in notes' :key='note.id' :id='note.id' :type='note.type' v-model='note.value' :color='note.color'
+        Note(v-for='note in notes' :key='note.id' :id='note.id' :ref='note.id' :type='note.type' v-model='note.value'
+          :paperColor='note.paperColor' :inkColor='note.inkColor'
           :zIndex='note.zIndex' :isOverBin='note.isOverBin' :dimensions='canvasDimensions' :zoomScale='canvas.scale' :position='note.position'
           @noteUpdate='onNoteUpdate')
       .note-selection(data-html2canvas-ignore)
-        Note(v-for='note in noteSelection' :key='note.id' :id='note.id' :type='note.type' :color='note.color'
+        Note(v-for='note in noteSelection' :key='note.id' :id='note.id' :type='note.type'
+          :paperColor='note.paperColor' :inkColor='note.inkColor'
           :zIndex='note.zIndex' :position='note.position'
           @noteUpdate='onNoteSelectionUpdate')
       .bin-container(ref='bin' :class='binClass' data-html2canvas-ignore)
@@ -52,9 +66,9 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import FileSaver from 'file-saver'
-import Note from '@/components/Note.vue'
+import Note, { PaperColors, InkColors, NoteTypes } from '@/components/Note.vue'
 import PointerIndicator from '@/components/PointerIndicator.vue'
-import { NoteColors, NoteTypes } from '@/components/Note.vue'
+
 import interact from 'interactjs'
 import { generateUID, clamp } from '@/shared/utils.ts'
 import _ from 'lodash'
@@ -65,7 +79,8 @@ import resize from 'vue-resize-directive'
 type NoteParameters = {
   id: string
   value: string
-  color: NoteColors
+  paperColor: PaperColors
+  inkColor: InkColors
   type: NoteTypes
   zIndex: number
   isOverBin: boolean
@@ -79,7 +94,8 @@ type NoteParameters = {
 type NoteConfig = {
   id?: string
   value?: string
-  color?: NoteColors
+  paperColor?: PaperColors
+  inkColor?: InkColors
   type?: NoteTypes
   zIndex?: number
   position?: {
@@ -108,16 +124,7 @@ export default class StickyNotesComponent extends Vue {
   dialogs = {
     clearNotes: false,
   }
-  tools = {
-    bucket: {
-      active: false,
-      swatch: {
-        name: 'yellow',
-        color: '#fffaba',
-      },
-    },
-  }
-  colorSwatches = [
+  bucketColors = [
     {
       name: 'yellow',
       color: '#fffaba',
@@ -147,6 +154,45 @@ export default class StickyNotesComponent extends Vue {
       color: '#f0b3ff',
     },
   ]
+  pencilColors = [
+    {
+      name: 'black',
+      color: '#222',
+    },
+    {
+      name: 'red',
+      color: '#8c0a00',
+    },
+    {
+      name: 'blue',
+      color: '#0011a6',
+    },
+    {
+      name: 'green',
+      color: '#0a8000',
+    },
+    {
+      name: 'purple',
+      color: '#540085',
+    },
+  ]
+  tools = {
+    bucket: {
+      active: false,
+      swatch: this.bucketColors[0],
+    },
+    pencil: {
+      active: false,
+      swatch: this.pencilColors[0],
+      noChange: false,
+    },
+    hand: {
+      active: true,
+    },
+    snapshot: {
+      active: false,
+    },
+  }
 
   get bucketColor() {
     if (this.tools.bucket.active) {
@@ -154,10 +200,33 @@ export default class StickyNotesComponent extends Vue {
     }
     return '#555'
   }
+  get pencilColor() {
+    if (this.tools.pencil.active) {
+      return this.tools.pencil.swatch.color
+    }
+    return '#555'
+  }
   get bucketStyle() {
     if (this.tools.bucket.active) {
       return {
         filter: 'drop-shadow(0px 0px 1px rgba(0,0,0,1))',
+        backgroundColor: 'rgba(0,200,100,0.04)',
+      }
+    }
+    return {}
+  }
+  get pencilStyle() {
+    if (this.tools.pencil.active) {
+      return {
+        backgroundColor: 'rgba(0,200,100,0.1)',
+      }
+    }
+    return {}
+  }
+  get handStyle() {
+    if (this.tools.hand.active) {
+      return {
+        backgroundColor: 'rgba(0,200,100,0.1)',
       }
     }
     return {}
@@ -188,7 +257,7 @@ export default class StickyNotesComponent extends Vue {
         type: 'move',
         note: { ...note, position },
       })
-    }, 15)
+    }, 10)
     if (!foundNote) return
     switch (event.type) {
       case 'input':
@@ -210,7 +279,17 @@ export default class StickyNotesComponent extends Vue {
         break
       case 'tapped':
         if (this.tools.bucket.active) {
-          foundNote.color = this.tools.bucket.swatch.name as NoteColors
+          foundNote.paperColor = this.tools.bucket.swatch.name as PaperColors
+          this.$emit('update', {
+            type: 'color',
+            note: foundNote,
+          })
+        }
+        if (this.tools.pencil.active) {
+          if (!this.tools.pencil.noChange) {
+            foundNote.inkColor = this.tools.pencil.swatch.name as InkColors
+          }
+          ;(this.$refs[foundNote.id][0] as Note).startEdit()
           this.$emit('update', {
             type: 'color',
             note: foundNote,
@@ -244,18 +323,37 @@ export default class StickyNotesComponent extends Vue {
 
   selectBucket(swatch: { name: string; color: string }) {
     this.tools.bucket.active = true
+    this.tools.hand.active = false
+    this.tools.pencil.active = false
     this.tools.bucket.swatch = swatch
   }
-  cancelBucket() {
+
+  selectPencil(swatch: { name: string; color: string }) {
+    this.tools.pencil.active = true
+    this.tools.pencil.noChange = false
+    this.tools.hand.active = false
+    this.tools.bucket.active = false
+
+    if (swatch) {
+      this.tools.pencil.swatch = swatch
+    } else {
+      this.tools.pencil.noChange = true
+    }
+  }
+  selectHand() {
+    this.tools.hand.active = true
+    this.tools.pencil.active = false
     this.tools.bucket.active = false
   }
+
   findNote(id): NoteParameters | undefined {
     return this.notes.find(note => note.id === id)
   }
   createNote(options: NoteConfig, network = false) {
     const defaultOptions = {
       value: '',
-      color: NoteColors.yellow,
+      paperColor: PaperColors.yellow,
+      inkColor: InkColors.black,
       type: NoteTypes.default,
       position: {
         x: 0,
@@ -268,7 +366,8 @@ export default class StickyNotesComponent extends Vue {
     const note = {
       id: network ? options.id : generateUID(),
       value: options.value,
-      color: options.color,
+      paperColor: options.paperColor,
+      inkColor: options.inkColor,
       zIndex: network ? options.zIndex : this.highestZindex + 1,
       isOverBin: false,
       position: options.position,
@@ -317,26 +416,14 @@ export default class StickyNotesComponent extends Vue {
       case 'delete':
         this.deleteNote(event.note.id, true)
         break
-      /*case 'input':
-        foundNote = this.findNote(event.note.id)
-
-        if (foundNote) foundNote.value = event.note.value
-        break
-      case 'dragEnd':
-        foundNote = this.findNote(event.note.id)
-        if (foundNote) {
-          this.updateNoteToTop(foundNote)
-          foundNote.position = event.note.position
-        }
-        break*/
-
       case 'update':
         foundNote = this.findNote(event.note.id)
         if (foundNote) {
           foundNote.value = event.note.value
           this.updateNoteToTop(foundNote)
           foundNote.position = event.note.position
-          foundNote.color = event.note.color
+          foundNote.paperColor = event.note.paperColor
+          foundNote.inkColor = event.note.inkColor
         }
         break
       case 'pointerMove':
@@ -361,17 +448,27 @@ export default class StickyNotesComponent extends Vue {
   }
   cloneNoteFromSelected(note) {
     const newNote = this.createNote({
-      color: note.color,
+      paperColor: note.paperColor,
+      inkColor: this.tools.pencil.swatch.name as InkColors,
       position: {
         x: (-this.canvas.x + note.position.x + 50) / this.canvas.scale,
-        y: (-this.canvas.y + 50) / this.canvas.scale,
+        y: (-this.canvas.y + 150) / this.canvas.scale,
         rotation: 0,
       },
-    })
+    }) as NoteParameters
+    setTimeout(() => {
+      if (newNote) {
+        ;(this.$refs[newNote.id][0] as Note).startEdit()
+      }
+    }, 10)
   }
 
   zoomReset() {
-    this.canvas = { x: 0, y: 0, scale: 1 }
+    this.canvas = {
+      x: -this.canvasDimensions / 3,
+      y: -this.canvasDimensions / 3,
+      scale: 1,
+    }
   }
 
   applyPointerIndicators() {
@@ -380,7 +477,7 @@ export default class StickyNotesComponent extends Vue {
         type: 'pointerMove',
         pointer,
       })
-    }, 15)
+    }, 10)
     const canvas = this.$refs.canvas as HTMLElement
     canvas.addEventListener('mousemove', e => {
       let mouseX = e.pageX - this.dimensions.viewPort.offsetX
@@ -466,11 +563,7 @@ export default class StickyNotesComponent extends Vue {
         scale: this.canvas.scale,
       })
     })
-    this.canvas = {
-      x: -this.canvasDimensions / 3,
-      y: -this.canvasDimensions / 3,
-      scale: 1,
-    }
+    this.zoomReset()
   }
 
   isNoteOverBin(id, isOverBin) {
@@ -480,11 +573,12 @@ export default class StickyNotesComponent extends Vue {
 
   createNoteSelection() {
     let offset = 320
-    Object.values(NoteColors).forEach((color, index) => {
+    Object.values(PaperColors).forEach((paperColor, index) => {
       const note = {
         id: generateUID(),
         value: '',
-        color,
+        paperColor,
+        inkColor: InkColors.black,
         type: NoteTypes.noteSelection,
         zIndex: 199,
         isOverBin: false,
@@ -499,8 +593,9 @@ export default class StickyNotesComponent extends Vue {
   }
 
   async snapshot() {
+    if (this.tools.snapshot.active) return
+    this.tools.snapshot.active = true
     const canvas = this.$refs.canvas as HTMLElement
-
     let left = Number.MAX_VALUE
     let top = Number.MAX_VALUE
     let bottom = -Number.MAX_VALUE
@@ -514,18 +609,51 @@ export default class StickyNotesComponent extends Vue {
         bottom = Math.max(bottom, y)
       })
 
+    left += this.canvas.x + this.dimensions.viewPort.offsetX
+    top += this.canvas.y + this.dimensions.viewPort.offsetY
+    right += this.canvas.x + this.dimensions.viewPort.offsetX
+    bottom += this.canvas.y + this.dimensions.viewPort.offsetY
     const contentBox = {
-      x: 15 + left - 75,
-      y: 200 + top - 75,
-      width: right - left + 300,
-      height: bottom - top + 300,
+      x: left - 50,
+      y: top - 50,
+      width: right - left + 250,
+      height: bottom - top + 250,
     }
 
-    const rendered = await html2canvas(canvas, { scale: 1, ...contentBox })
-    const fileName = `${new Date().toISOString().substr(0, 10)} - export.png`
-    rendered.toBlob(function(blob) {
-      FileSaver.saveAs(blob, fileName)
-    })
+    const oldScale = this.canvas.scale
+    this.canvas.scale = 1
+
+    setTimeout(async () => {
+      const rendered = await html2canvas(canvas, {
+        ...contentBox,
+        onclone: doc => {
+          this.canvas.scale = oldScale
+          doc.querySelectorAll('.note').forEach((el: Element, key, parent) => {
+            let htmlElement = el as HTMLElement
+            const originalNote = this.findNote(htmlElement.dataset.id)
+            htmlElement.setAttribute(
+              'style',
+              htmlElement.style +
+                `;position: absolute; left: ${-originalNote!.position
+                  .x}px; top: ${-originalNote!.position.y}px`,
+            )
+          })
+          doc.querySelectorAll('.paper').forEach((el: Element, key, parent) => {
+            let htmlElement = el as HTMLElement
+            htmlElement.setAttribute(
+              'style',
+              htmlElement.style +
+                `; border-bottom: 1.5px solid #ccc; border-right: 1px solid #ddd;`,
+            )
+          })
+        },
+      })
+      this.tools.snapshot.active = false
+      const fileName = `${new Date().toISOString().substr(0, 10)} - export.png`
+      rendered.toBlob(function(blob) {
+        FileSaver.saveAs(blob, fileName)
+      })
+    }, 10)
   }
 
   managePointers() {
@@ -546,8 +674,27 @@ export default class StickyNotesComponent extends Vue {
 
     this.createNoteSelection()
     /*this.createNote({
-      position: { x: 100, y: 100 },
+      position: { x: 2000, y: 2000 },
       value: 'Hello',
+      inkColor: InkColors.red,
+    })
+    this.createNote({
+      position: { x: 2150, y: 2000 },
+      value: 'a a a a a a a ',
+      paperColor: PaperColors.green,
+      inkColor: InkColors.blue,
+    })
+    this.createNote({
+      position: { x: 2150, y: 2150 },
+      value: 'Was ist das',
+      paperColor: PaperColors.red,
+      inkColor: InkColors.green,
+    })
+    this.createNote({
+      position: { x: 2300, y: 2150 },
+      value: 'Alle meine Entchen schwimmen auf dem See',
+      paperColor: PaperColors.blue,
+      inkColor: InkColors.purple,
     })*/
     this.applyZoom()
     this.applyPointerIndicators()
@@ -580,7 +727,7 @@ springy = cubic-bezier(0.35, 0.35, 0.57, 1.54)
   display flex
   flex-wrap wrap
   justify-content center
-  max-width 140px
+  max-width 145px
 
 .canvas-container
   position absolute

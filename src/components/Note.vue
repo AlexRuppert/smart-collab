@@ -4,21 +4,29 @@
     .paper
     .text-container
       .text(ref='text' :style='textStyle' :contenteditable='isEdited' spellcheck='false'
-        @focusout='onEditEnd' @focus='onFocus' @keydown.enter='onEnter') {{valueText}}
+        @focusout='onEditEnd' @focus='onFocus' @keydown.enter='onEnter')
       
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import interact from 'interactjs'
-import { clamp } from '@/shared/utils.ts'
-
-export enum NoteColors {
+import _ from 'lodash'
+import { clamp, TextWidth } from '@/shared/utils.ts'
+export enum PaperColors {
   yellow = 'yellow',
   blue = 'blue',
   green = 'green',
   red = 'red',
   orange = 'orange',
   white = 'white',
+  purple = 'purple',
+}
+
+export enum InkColors {
+  black = 'black',
+  blue = 'blue',
+  green = 'green',
+  red = 'red',
   purple = 'purple',
 }
 
@@ -34,11 +42,15 @@ export default class Note extends Vue {
   innerPosition = { x: 0, y: 0, rotation: 0 }
   isDragged = false
   isHold = false
-  isEdited = true
+  isEdited = false
   isVisible = false
   interactInstance!: any
 
   rotationSmoother = [] as number[]
+  bestFit!: any
+
+  recomputeTextStyle = false
+
   @Prop({
     default: 1,
   })
@@ -69,9 +81,14 @@ export default class Note extends Vue {
   type!: string
 
   @Prop({
-    default: NoteColors.yellow,
+    default: PaperColors.yellow,
   })
-  color!: NoteColors
+  paperColor!: PaperColors
+
+  @Prop({
+    default: InkColors.black,
+  })
+  inkColor!: InkColors
 
   @Prop({
     default: { x: 0, y: 0, rotation: 0 },
@@ -87,10 +104,32 @@ export default class Note extends Vue {
     this.innerValue = this.value
   }
 
+  @Watch('innerValue')
+  onInnerValueChanged() {
+    const text = this.$refs.text as HTMLElement
+    if (this.isEdited) {
+      text.innerText = this.innerValue
+    } else {
+      this.bestFit = this.getBestFit(this.innerValue)
+      text.innerText = this.bestFit.value
+    }
+  }
+
   //hack, as sometimes the value is not reactively updated from network, no idea why...
   get valueText() {
-    if (this.value != this.innerValue) return this.value
-    return this.innerValue
+    let value = ''
+    if (this.value != this.innerValue) {
+      value = this.value
+    } else {
+      value = this.innerValue
+    }
+    if (this.isEdited) {
+      return value
+    }
+
+    this.bestFit = this.getBestFit(value)
+
+    return this.bestFit.value
   }
 
   @Watch('position')
@@ -98,16 +137,25 @@ export default class Note extends Vue {
     this.innerPosition = this.position
   }
 
-  onEditStart() {
+  startEdit() {
     this.isEdited = true
 
     const text = this.$refs.text as HTMLElement
+    this.onInnerValueChanged()
     setTimeout(() => {
       text.focus()
     }, 10)
   }
   onFocus() {
-    document.execCommand('selectAll', false, undefined)
+    //document.execCommand('selectAll', false, undefined)
+
+    const text = this.$refs.text as HTMLInputElement
+    const range = document.createRange()
+    range.selectNodeContents(text)
+    range.collapse(false)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(range)
   }
   onEnter(event) {
     event.target.blur()
@@ -115,19 +163,13 @@ export default class Note extends Vue {
   onEditEnd(event) {
     this.isEdited = false
     this.innerValue = event.target.innerText.trim().replace(/\s+/g, ' ')
-    const text = this.$refs.text as HTMLElement
-    let contentChild
-
-    Array.from(text.childNodes)
-      .filter(c => c.nodeType === 3 && !c.nodeValue?.trim())
-      .forEach(c => text.removeChild(c))
-
+    this.onInnerValueChanged()
     this.$emit('input', this.innerValue)
     this.$emit('noteUpdate', { type: 'input', note: this })
   }
 
   get noteClass() {
-    const classes = ['n-' + this.color] as string[]
+    const classes = ['p-' + this.paperColor, 'i-' + this.inkColor] as string[]
 
     if (this.type === NoteTypes.noteSelection) {
       classes.push('ui-element')
@@ -152,24 +194,72 @@ export default class Note extends Vue {
 
     return classes
   }
+  getBestFit(value) {
+    if (value.length <= 0) {
+      return {
+        value: '',
+        maxDim: 100,
+      }
+    }
+
+    const contentSplit = value
+      .split(/\s/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+    const content = contentSplit.join(' ')
+
+    let multiLines = ['', '', '', '', '']
+      .map((el, i) => {
+        let limit = content.length / (i + 1)
+
+        let row = ''
+        let k = 0
+        let text = ''
+        while (k < contentSplit.length) {
+          while (row.length < limit && k < contentSplit.length) {
+            row += ' ' + contentSplit[k++]
+            row = row.trim()
+          }
+          text += row + '\n'
+          row = ''
+        }
+        return text.trim().split('\n')
+      })
+      .map(multi => {
+        let maxWidth = Math.max(
+          ...multi.map(line =>
+            TextWidth.measure(line, '16px "Caveat", Arial Narrow, serif'),
+          ),
+        )
+        let maxHeight = 16 * 1.2 * multi.length
+
+        return {
+          value: multi.join('\n'),
+          maxWidth,
+          maxDim: Math.max(maxWidth, maxHeight),
+        }
+      })
+
+    return _.first(_.sortBy(multiLines, 'maxDim'))
+  }
   get textStyle() {
-    const contentArray = this.innerValue.split(/\s/).map(s => s.trim())
-    const maxLineLength = Math.max(...contentArray.map(c => c.length))
-    const lineCount = contentArray.length
+    this.recomputeTextStyle
+    this.innerValue
+    this.value
+    this.valueText
+
+    let scaleFactor = 130 / (this.bestFit?.maxDim ?? 130)
 
     let fontSize
 
     if (this.isEdited) {
       fontSize = 20
     } else {
-      fontSize = 150 / (maxLineLength * 0.8)
-      if (lineCount >= maxLineLength) {
-        fontSize = 150 / (lineCount * 0.5)
-      }
-      fontSize = clamp(15, fontSize, 90)
+      fontSize = clamp(15, Math.floor(16 * scaleFactor), 90)
     }
     const lineHeight = clamp(15, fontSize * 1.1, 90)
     return {
+      whiteSpace: this.isEdited ? 'normal' : 'pre',
       fontSize: fontSize + 'px',
       lineHeight: lineHeight + 'px',
     }
@@ -258,18 +348,17 @@ export default class Note extends Vue {
         },
       })
       .on('doubletap', event => {
-        this.isEdited = true
-
-        const text = this.$refs.text as HTMLElement
-        setTimeout(() => {
-          text.focus()
-        }, 10)
+        this.startEdit()
       })
       .on('tap', event => {
         this.$emit('noteUpdate', { type: 'tapped', note: this })
       })
 
     this.fadeIn()
+    setTimeout(() => {
+      this.bestFit = this.getBestFit(this.innerValue)
+      this.recomputeTextStyle = !this.recomputeTextStyle
+    }, 200)
   }
 
   beforeDestroy() {
@@ -288,12 +377,13 @@ random(a, b)
   return math(math(0, 'random') * (b - a + 1) + a, 'floor')
 
 paper-colors = { yellow: #fffaba, blue: #b3e4ff, green: #d4ffb3, red: #ffb6b3, orange: #ffd6b3, white: #fdfdfd, purple: #f0b3ff }
+ink-colors = { black: #222, red: #8c0a00, blue: #0011a6, green: #0a8000, purple: #540085 }
 paper-hues = { yellow: 165, blue: 165, green: 165, red: 165, orange: 165, white: 0, purple: 165 }
 springy = cubic-bezier(0.35, 0.35, 0.57, 1.54)
 
 generateColorGradients(classname)
   for name, color in paper-colors
-    &.n-{name}
+    &.p-{name}
       .{classname}
         gradient(color)
 
@@ -310,10 +400,15 @@ generateColorGradients(classname)
   border-radius 2px
   background transparent
   opacity 0
-  transition transform 0.15s linear
+  transition transform 0.105s linear
   transform-origin center center
   user-select none
   will-change transform
+
+  for name, color in ink-colors
+    &.i-{name}
+      .text
+        color color
 
   &.visible
     opacity 1
@@ -384,31 +479,31 @@ generateColorGradients(classname)
     filter-color(hue, bri)
       invert(30%) sepia(100%) saturate(180%) hue-rotate(unit(hue, deg)) brightness(percentage(bri)) contrast(110%) drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.3))
 
-    &.n-blue
+    &.p-blue
       .paper
         filter filter-color(165, 1)
 
-    &.n-red
+    &.p-red
       .paper
         filter filter-color(-50, 1)
 
-    &.n-green
+    &.p-green
       .paper
         filter filter-color(50, 1.2)
 
-    &.n-yellow
+    &.p-yellow
       .paper
         filter filter-color(15, 1.2)
 
-    &.n-purple
+    &.p-purple
       .paper
         filter filter-color(-115, 1)
 
-    &.n-orange
+    &.p-orange
       .paper
         filter filter-color(-10, 1)
 
-    &.n-white
+    &.p-white
       .paper
         filter invert(30%) contrast(100%) brightness(150%)
 
@@ -441,6 +536,7 @@ generateColorGradients(classname)
     outline none
     color #222
     text-align center
+    white-space pre
     font-family 'Caveat', cursive
     transition font-size 0.1s springy
 

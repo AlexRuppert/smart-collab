@@ -46,7 +46,7 @@ thickness = 5px
   height dim
   border-radius dim
   filter drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.35))
-  transition transform 0.1s linear
+  transition transform 0.105s linear
   user-select none
 
   .center-ring

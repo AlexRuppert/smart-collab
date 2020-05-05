@@ -32,7 +32,7 @@ export default class Sync {
     this.ydoc = new Y.Doc()
     this.provider = new WebrtcProvider(room.name, this.ydoc, {
       password: room.password,
-      signaling: ['ws://localhost:4444'],
+      //signaling: ['ws://localhost:4444'],
     })
     this.provider.on('connect', () => console.log('asd'))
     this.addBindings()
@@ -62,7 +62,11 @@ export default class Sync {
       }
     }
   }
-  addStickyNotesBinding(networkUpdate, localUpdateRegister, options: any) {
+  addStickyNotesBinding(
+    networkUpdate,
+    localUpdateRegister,
+    initialNotes: any[],
+  ) {
     this.bindings.stickyNotes?.destroy()
     //window.aw = this.provider.awareness
     this.bindingsToConnect.stickyNotes = () => {
@@ -113,6 +117,16 @@ export default class Sync {
             })
           })
         })
+
+        if (initialNotes.length > 0) {
+          initialNotes.forEach(note => {
+            notes.set(note.id, note)
+          })
+        } else {
+          notes.forEach(note => {
+            networkUpdate({ type: 'create', note })
+          })
+        }
         notes.observe(event => {
           if (event.transaction.local) return
 
