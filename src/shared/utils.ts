@@ -11,12 +11,3 @@ export function generateUID() {
 }
 
 export const clamp = (min, val, max) => Math.min(Math.max(min, val), max)
-
-export class TextWidth {
-  static canvasContext = document.createElement('canvas').getContext('2d')
-
-  static measure(text, font) {
-    TextWidth.canvasContext!.font = font
-    return TextWidth.canvasContext!.measureText(text).width
-  }
-}

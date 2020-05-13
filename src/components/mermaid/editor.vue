@@ -26,8 +26,8 @@ import debounce from 'un-debounce'
 import FileSaver from 'file-saver'
 
 @Component
-export default class EditorComponent extends Vue {
-  name = 'EditorComponent'
+export default class Editor extends Vue {
+  name = 'Editor'
   value = ''
   editor = {
     instance: null as any,
@@ -127,73 +127,63 @@ C -->|Two| E[Result 2]`.trim(),
 }
 </script>
 <style lang="stylus" scoped>
-.editor-card {
-  display: flex;
-  flex-direction: column;
-}
+.editor-card
+  display flex
+  flex-direction column
 
-#editor {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+#editor
+  display flex
+  flex 1
+  flex-direction column
 
-  .codemirror-container {
-    flex: 1 1 auto;
-  }
+  .codemirror-container
+    flex 1 1 auto
 
-  .error-container {
-    height: 70px;
-  }
-}
+  .error-container
+    height 70px
 
-.error-list {
-  color: #a90101;
-  font-family: monospace;
-  font-size: small;
-  line-height: normal;
-  overflow: auto;
-}</style>
+.error-list
+  overflow auto
+  color #a90101
+  font-size small
+  font-family monospace
+  line-height normal</style>
 
 <style lang="stylus">
-.gutter-error {
-  font-size: x-small;
-}
+.gutter-error
+  font-size x-small
 
-.CodeMirror {
-  height: 100%;
-  border: 1px solid #f0f0f0;
-}
+.CodeMirror
+  height 100%
+  border 1px solid #f0f0f0
 
-.CodeMirror-scroll {
-  padding-top: 10px;
-}
+.CodeMirror-scroll
+  padding-top 10px
 
-.remote-caret {
-  position: absolute;
-  border-left: black;
-  border-left-style: solid;
-  border-left-width: 1.2px;
-  height: 1.1em;
-  margin-left: -1px;
-  opacity: 0.7;
-  font-family: 'Roboto', sans-serif !important;
-}
+.remote-caret
+  position absolute
+  margin-left -1px
+  height 1.1em
+  border-left black
+  border-left-width 1.2px
+  border-left-style solid
+  font-family 'Roboto', sans-serif !important
+  opacity 0.7
 
-.remote-caret > div {
-  font-family: 'Roboto', sans-serif !important;
-  position: relative;
-  top: -1em;
-  margin-left: -1.2px;
-  font-size: 0.7em;
-  background-color: rgb(250, 129, 0);
-  font-family: serif;
-  font-style: normal;
-  font-weight: normal;
-  line-height: normal;
-  user-select: none;
-  color: white;
-  padding: 1px 5px;
-  z-index: 3;
-  box-shadow: 1px 1px 4px #666;
-}
+.remote-caret > div
+  position relative
+  top -1em
+  z-index 3
+  margin-left -1.2px
+  padding 1px 5px
+  background-color rgb(250, 129, 0)
+  box-shadow 1px 1px 4px #666
+  color white
+  font-weight normal
+  font-style normal
+  font-size 0.7em
+  font-family 'Roboto', sans-serif !important
+  font-family serif
+  line-height normal
+  user-select none
 </style>

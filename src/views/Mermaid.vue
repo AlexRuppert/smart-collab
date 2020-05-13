@@ -1,6 +1,6 @@
 <template lang="pug">
   v-container.container(fluid)
-    RoomComponent.room(@connected='onConnected' @notify='onNotify')
+    RoomComponent.room(:sync='sync' @connected='onConnected' @notify='onNotify')
     EditorComponent.editor(@input='onCodeChanged' :errors='mermaidParsingErrors' @editor='onEditorInitialized')
     MermaidComponent.graph(:code='code' @parseResult='onMermaidParsingResult')
     v-snackbar(v-model='toaster.enabled' top :timeout='2000') {{ toaster.text }}
@@ -12,11 +12,10 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { StoreType } from '@/store'
 
-import Sync from '@/shared/sync'
-
-import MermaidComponent from '@/components/MermaidComponent.vue'
-import EditorComponent from '@/components/EditorComponent.vue'
-import RoomComponent from '@/components/RoomComponent.vue'
+import Sync from '@/components/mermaid/sync'
+import MermaidComponent from '@/components/mermaid/mermaid.vue'
+import EditorComponent from '@/components/mermaid/editor.vue'
+import RoomComponent from '@/components/room/room.vue'
 @Component({
   components: { MermaidComponent, EditorComponent, RoomComponent },
   store: ['title'],
@@ -31,7 +30,7 @@ export default class Mermaid extends Vue {
     enabled: false,
     text: '',
   }
-
+  sync = new Sync()
   onNotify(text) {
     this.toaster = {
       enabled: true,
@@ -53,7 +52,7 @@ export default class Mermaid extends Vue {
     this.editor = editor
   }
   onConnected(options) {
-    this.$store.sync.addMermaidBinding(this.editor, options)
+    this.sync.addBinding(this.editor, options)
   }
   mounted() {
     this.$store.title = 'Mermaid Swarm'

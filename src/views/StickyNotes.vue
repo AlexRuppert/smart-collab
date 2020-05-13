@@ -1,6 +1,6 @@
 <template lang="pug">
   v-container.container(fluid)
-    RoomComponent.room(@connected='onConnected' @notify='onNotify')
+    RoomComponent.room(:sync='sync' @connected='onConnected' @notify='onNotify')
     StickyNotesComponent(ref='stickyNotes' @update='onLocalUpdate')
     v-snackbar(v-model='toaster.enabled' top :timeout='2000') {{ toaster.text }}
       v-btn(dark icon @click='toaster.enabled = false') 
@@ -10,12 +10,9 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { StoreType } from '@/store'
-
-import Sync from '@/shared/sync'
-
-import StickyNotesComponent from '@/components/StickyNotesComponent.vue'
-
-import RoomComponent from '@/components/RoomComponent.vue'
+import Sync from '@/components/sticky-notes/sync'
+import StickyNotesComponent from '@/components/sticky-notes/stickyNotes.vue'
+import RoomComponent from '@/components/room/room.vue'
 @Component({
   components: { StickyNotesComponent, RoomComponent },
   store: ['title'],
@@ -23,6 +20,8 @@ import RoomComponent from '@/components/RoomComponent.vue'
 export default class StickyNotes extends Vue {
   name = 'StickyNotes'
   $store!: StoreType
+
+  sync = new Sync()
   toaster = {
     enabled: false,
     text: '',
@@ -49,11 +48,10 @@ export default class StickyNotes extends Vue {
     const stickyNotes = this.$refs.stickyNotes as StickyNotesComponent
     let initialNotes
     if (!options.created) {
-      console.log('clear')
       stickyNotes.clearNotes()
     }
 
-    this.$store.sync.addStickyNotesBinding(
+    this.sync.addBinding(
       this.onNetworkUpdate,
       updateFn => (this.localUpdateObject.update = updateFn),
       stickyNotes.notes,

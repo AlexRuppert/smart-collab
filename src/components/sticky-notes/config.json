@@ -1,0 +1,15 @@
+{
+  "note": {
+    "width": 150,
+    "height": 150
+  },
+  "canvas": {
+    "width": 6000,
+    "height": 6000,
+    "minZoom": 0.5,
+    "maxZoom": 1.5
+  },
+  "sync": {
+    "updateInterval": 5
+  }
+}

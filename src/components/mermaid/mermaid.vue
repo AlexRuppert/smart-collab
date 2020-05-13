@@ -34,8 +34,8 @@ import FileSaver from 'file-saver'
 import panzoom from 'panzoom'
 
 @Component
-export default class MermaidComponent extends Vue {
-  name = 'MermaidComponent'
+export default class Mermaid extends Vue {
+  name = 'Mermaid'
 
   @Prop({
     default: ``,
