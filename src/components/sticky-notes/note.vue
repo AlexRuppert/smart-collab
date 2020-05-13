@@ -140,6 +140,7 @@ export default class Note extends Vue {
   }
 
   startEdit() {
+    if (this.isEdited) return
     this.isEdited = true
     this.text.value = this.innerValue
 
@@ -167,12 +168,12 @@ export default class Note extends Vue {
       .styleCursor(false)
       .draggable({
         onstart: () => {
-          if (this.isEdited) return
+          //if (this.isEdited) return
           this.isDragged = true
           this.$emit(EVENT_UPDATE, { type: 'dragStart', note: this })
         },
         onmove: event => {
-          if (this.isEdited || this.type === NoteTypes.noteCreation) return
+          if (this.type === NoteTypes.noteCreation) return
 
           let { x, y } = {
               ...this.innerPosition,
@@ -185,7 +186,7 @@ export default class Note extends Vue {
           let rotation = clamp(-MAX_ROTATION, dx / 5, MAX_ROTATION)
           smoothRotation[sri] = rotation
 
-          rotation = mean(smoothRotation)
+          rotation = 0 // mean(smoothRotation)
           if (++sri >= smoothRotation.length) sri = 0
 
           this.innerPosition = { x, y, rotation }

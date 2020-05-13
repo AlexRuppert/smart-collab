@@ -415,7 +415,7 @@ export default class StickyNotes extends Vue {
     })
 
     this.createNoteCreation()
-    this.createTestNotes()
+    //this.createTestNotes()
     this.initZoom()
     this.initPointerIndicators()
 
