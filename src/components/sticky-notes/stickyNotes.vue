@@ -4,11 +4,12 @@
       ToolBar(:activeTool.sync='activeTool' :tools.sync='tools' :processing='processing' 
         @clearNotes='clearNotes' @zoomReset='zoomReset' @snapshot='snapshot')
     v-card-text.canvas-container.pb-0(ref='canvasContainer' v-resize:debounce='updateDimensions')
-      .canvas(ref='canvasElement' data-pan :style='canvasStyle')
+      .canvas(ref='canvasElement' data-pan :style='canvasStyle' @contextmenu.prevent='')
         Note(v-for='note in notes' :key='note.id' :id='note.id' :ref='note.id' :type='note.type' :value.sync='note.value'
-          :color='note.color' :canvas='{scale:canvas.scale, dimensions: canvasDimensions}'
+          :color='note.color' :canvas='{scale:canvas.scale, x: canvas.x, y: canvas.y, dimensions: canvasDimensions, viewPort: dimensions.viewPort}'
           :zIndex='note.zIndex' :isCrumbled='note.isCrumbled' :position.sync='note.position'
-          @noteUpdate='onNoteUpdate')
+          :grid='tools.grid.enabled'
+          @noteUpdate='onNoteUpdate' @noteMenu='onNoteMenu')
       .note-selection(data-html2canvas-ignore)
         Note(v-for='note in noteCreation' :key='note.id' :id='note.id' :type='note.type'
           :color='note.color' :position.sync='note.position'
@@ -17,6 +18,8 @@
         v-icon.bin.ui-element {{isOverBin?'mdi-delete-empty':'mdi-delete'}}
       .pointer-layer
         PointerIndicator(v-for='pointer in pointers' :key='pointer.id' :position='pointer.position' :user='pointer.user')
+    NoteMenu(:menu.sync='noteMenu' @noteMenuAction='onNoteMenuAction')
+
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch, Ref } from 'vue-property-decorator'
@@ -30,8 +33,10 @@ import {
   ToolStatus,
   NoteUpdateEventTypes,
   SyncEventTypes,
+  NoteMenuEventTypes,
 } from './types'
 import Note from './note.vue'
+import NoteMenu from './noteMenu.vue'
 import { snapshot } from './export'
 import ToolBar from './toolBar.vue'
 import PointerIndicator from './pointerIndicator.vue'
@@ -44,7 +49,7 @@ import config from './config.json'
 type NoteConfig = Partial<NoteParameters>
 const UPDATE_EVENT = 'update'
 @Component({
-  components: { Note, ToolBar, PointerIndicator },
+  components: { Note, ToolBar, PointerIndicator, NoteMenu },
   directives: { resize },
 })
 export default class StickyNotes extends Vue {
@@ -73,9 +78,16 @@ export default class StickyNotes extends Vue {
   tools: ToolStatus = {
     bucket: { swatch: { name: 'yellow', color: '' } },
     pen: { swatch: { name: 'black', color: '' } },
+    grid: { enabled: false },
   }
   processing = { snapshot: false }
-
+  noteMenu = {
+    enabled: false,
+    noteId: '',
+    closeOnClick: false,
+    x: 0,
+    y: 0,
+  }
   @Ref()
   bin!: HTMLElement
   @Ref()
@@ -92,8 +104,35 @@ export default class StickyNotes extends Vue {
       transform: `translate3D(${x}px, ${y}px, 0) scale(${scale}, ${scale})`,
     }
   }
-
-  onNoteUpdate(event) {
+  onNoteMenu(event) {
+    this.noteMenu = {
+      enabled: true,
+      noteId: event.noteId,
+      closeOnClick: event.closeOnClick,
+      x: event.x,
+      y: event.y,
+    }
+  }
+  onNoteMenuAction(event: {
+    type: NoteMenuEventTypes
+    noteId: string
+    [key: string]: any
+  }) {
+    let note = this.findNote(event.noteId)
+    if (!note) return
+    switch (event.type) {
+      case NoteMenuEventTypes.delete:
+        this.deleteNote(event.noteId)
+        break
+      case NoteMenuEventTypes.changePaperColor:
+        this.changePaperColor(note, event.color as PaperColors)
+        break
+      case NoteMenuEventTypes.changeInkColor:
+        this.changeInkColor(note, event.color as InkColors)
+        break
+    }
+  }
+  onNoteUpdate(event: { type: NoteUpdateEventTypes; [key: string]: any }) {
     const note = this.findNote(event.note.id)
 
     const throttledMove = throttle(note => {
@@ -119,18 +158,13 @@ export default class StickyNotes extends Vue {
           ;(this.$refs[note.id][0] as Note).startEdit()
         }
         if (this.activeTool === ToolTypes.bucket) {
-          note.color.paper = this.tools.bucket.swatch.name as PaperColors
-          this.$emit(UPDATE_EVENT, {
-            type: NoteUpdateEventTypes.color,
+          this.changePaperColor(
             note,
-          })
+            this.tools.bucket.swatch.name as PaperColors,
+          )
         }
         if (this.activeTool === ToolTypes.pen) {
-          note.color.ink = this.tools.pen.swatch.name as InkColors
-          this.$emit(UPDATE_EVENT, {
-            type: NoteUpdateEventTypes.color,
-            note,
-          })
+          this.changeInkColor(note, this.tools.pen.swatch.name as InkColors)
         }
         break
       case NoteUpdateEventTypes.move:
@@ -153,6 +187,21 @@ export default class StickyNotes extends Vue {
 
   findNote(id): NoteParameters | undefined {
     return this.notes.find(note => note.id === id)
+  }
+  changePaperColor(note: NoteParameters, color: PaperColors) {
+    note.color.paper = color
+    this.$emit(UPDATE_EVENT, {
+      type: NoteUpdateEventTypes.color,
+      note,
+    })
+  }
+
+  changeInkColor(note: NoteParameters, color: InkColors) {
+    note.color.ink = color
+    this.$emit(UPDATE_EVENT, {
+      type: NoteUpdateEventTypes.color,
+      note,
+    })
   }
   createNote(options: NoteConfig, network = false) {
     const defaultOptions = {
@@ -249,7 +298,7 @@ export default class StickyNotes extends Vue {
       },
       position: {
         x:
-          (-this.canvas.x + note.position.x + config.note.width / 3) /
+          (-this.canvas.x + note.position.x + config.note.width * 0.65) /
           this.canvas.scale,
         y: (-this.canvas.y + config.note.width) / this.canvas.scale,
         rotation: 0,

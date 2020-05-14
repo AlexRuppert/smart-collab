@@ -45,6 +45,12 @@ export enum SyncEventTypes {
   pointerMove = 'pointerMove',
 }
 
+export enum NoteMenuEventTypes {
+  delete = 'delete',
+  changePaperColor = 'changePaperColor',
+  changeInkColor = 'changeInkColor',
+}
+
 export interface NoteParameters {
   id: string
   value?: string
@@ -86,4 +92,5 @@ interface Swatch {
 export interface ToolStatus {
   bucket: { swatch: Swatch }
   pen: { swatch: Swatch }
+  grid: { enabled: boolean }
 }

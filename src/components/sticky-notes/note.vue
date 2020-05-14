@@ -1,16 +1,22 @@
 <template lang="pug">
   transition(name='slide' appear)
-    .note(ref='root' :data-id='id' :style='noteStyle' :class='noteClass')
+    .note(ref='root' :data-id='id' :style='noteStyle' :class='noteClass' @contextmenu.prevent='onContextMenu')
       .shadow
       .paper
       .text-container
-        //transition-group(tag='div' name='fade' mode='out-in')
         textarea(v-show='isEdited' :key='1' ref='text' maxlength='100' spellcheck='false'
           @focusout='endEdit' @focus='onFocus' @keydown.enter='onEnter')
         .text(v-show='!isEdited' :key='2' :style='textStyle') {{formattedText}}
 </template>
 <script lang="ts">
-import { Component, Prop, Vue, Ref, PropSync } from 'vue-property-decorator'
+import {
+  Component,
+  Prop,
+  Vue,
+  Ref,
+  PropSync,
+  Watch,
+} from 'vue-property-decorator'
 import interact from 'interactjs'
 import Interactable from '@interactjs/core/Interactable'
 import { mean } from 'lodash'
@@ -26,6 +32,7 @@ import {
 import { BestFit } from './bestFit'
 import * as config from './config.json'
 const EVENT_UPDATE = 'noteUpdate'
+const EVENT_MENU = 'noteMenu'
 const BASE_FONT_SIZE = 16
 @Component
 export default class Note extends Vue {
@@ -53,9 +60,20 @@ export default class Note extends Vue {
   innerValue!: string
 
   @Prop({
+    default: false,
+  })
+  grid!: boolean
+
+  @Prop({
     default: () => ({ scale: 1, dimensions: 1000 }),
   })
-  canvas!: { scale: number; dimensions: number }
+  canvas!: {
+    scale: number
+    x: number
+    y: number
+    dimensions: number
+    viewPort: { x: number; y: number }
+  }
 
   @Prop({
     default: false,
@@ -82,6 +100,55 @@ export default class Note extends Vue {
   })
   color!: { paper: PaperColors; ink: InkColors }
 
+  @Watch('grid')
+  onGridChanged() {
+    const toCanvasCoord = ({ x, y }) => ({
+      x: (x - this.canvas.viewPort.x - this.canvas.x) / this.canvas.scale,
+      y: (y - this.canvas.viewPort.y - this.canvas.y) / this.canvas.scale,
+    })
+    const toPointerCoord = ({ x, y }) => ({
+      x: x * this.canvas.scale + this.canvas.x + this.canvas.viewPort.x,
+      y: y * this.canvas.scale + this.canvas.y + this.canvas.viewPort.y,
+    })
+
+    const floorX = x => Math.floor(x / config.note.width) * config.note.width
+    const floorY = y => Math.floor(y / config.note.height) * config.note.height
+    const ceilX = x => Math.ceil(x / config.note.width) * config.note.width
+    const ceilY = y => Math.ceil(y / config.note.height) * config.note.height
+
+    const calc = (x, y, xCalc, yCalc) => {
+      let canvasCoord = toCanvasCoord({ x, y })
+      return toPointerCoord({
+        x: xCalc(canvasCoord.x),
+        y: yCalc(canvasCoord.y),
+      })
+    }
+    this.interactInstance.draggable({
+      modifiers: this.grid
+        ? [
+            interact.modifiers.snap({
+              targets: [
+                (x, y) => calc(x, y, floorX, floorY),
+                (x, y) => calc(x, y, floorX, ceilY),
+                (x, y) => calc(x, y, ceilX, floorY),
+                (x, y) => calc(x, y, ceilX, ceilY),
+              ],
+              range: 70,
+              relativePoints: [{ x: 0, y: 0 }],
+            }),
+          ]
+        : [],
+    })
+  }
+
+  onContextMenu(event: PointerEvent) {
+    this.$emit(EVENT_MENU, {
+      noteId: this.id,
+      x: event.clientX,
+      y: event.clientY,
+      closeOnClick: true,
+    })
+  }
   get bestFit() {
     return BestFit.getFit(this.innerValue, {
       baseFontSize: BASE_FONT_SIZE,
@@ -109,6 +176,9 @@ export default class Note extends Vue {
 
     if (this.isCrumbled) {
       classes.push('crumbled')
+    }
+    if (this.grid) {
+      classes.push('grid')
     }
 
     return classes
@@ -164,8 +234,11 @@ export default class Note extends Vue {
     let smoothRotation = [0, 0, 0, 0, 0]
     let sri = 0
     const MAX_ROTATION = 20
+    const HOLD_DURATION = 550
+    interact.pointerMoveTolerance(20)
     this.interactInstance = interact(this.root)
       .styleCursor(false)
+
       .draggable({
         onstart: () => {
           //if (this.isEdited) return
@@ -201,10 +274,34 @@ export default class Note extends Vue {
         //this.startEdit()
       })
       .on('tap', event => {
-        if (event.double) return
+        if (event.dt > HOLD_DURATION) {
+          setTimeout(() => {
+            this.$emit(EVENT_MENU, {
+              noteId: this.id,
+              x: event.clientX,
+              y: event.clientY,
+              closeOnClick: true,
+            })
+          }, 100)
+
+          return
+        }
+        if (event.double || event.which === 3) return
         this.$emit(EVENT_UPDATE, { type: 'tap', note: this })
       })
+      .on('hold', event => {
+        event.preventDefault()
+        this.$emit(EVENT_MENU, {
+          noteId: this.id,
+          x: event.clientX,
+          y: event.clientY,
+          closeOnClick: false,
+        })
+      })
+      .pointerEvents({ holdDuration: HOLD_DURATION })
 
+    this.onGridChanged()
+    //font loading
     setTimeout(() => {
       this.recomputeTextStyle = !this.recomputeTextStyle
     }, 200)
@@ -250,7 +347,7 @@ gradient(color, params)
 
   for name, color in inkColors
     &.i-{name}
-      .text
+      textarea, .text
         color color
 
   for name, color in paperColors
@@ -326,7 +423,7 @@ gradient(color, params)
       .paper
         filter invert(30%) contrast(100%) brightness(150%)
 
-    .text
+    .text, textarea
       display none
 
   &.edited .text
