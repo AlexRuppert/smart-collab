@@ -107,6 +107,8 @@ C -->|Two| E[Result 2]`.trim(),
       lineNumbers: true,
       gutters: ['errors'],
       lint: true,
+      styleActiveLine: { nonEmpty: true },
+      styleActiveSelected: true,
     })
 
     this.value = this.editor.instance.doc.getValue()
@@ -135,9 +137,11 @@ C -->|Two| E[Result 2]`.trim(),
   display flex
   flex 1
   flex-direction column
+  height calc(100% - 70px)
 
   .codemirror-container
     flex 1 1 auto
+    overflow auto
 
   .error-container
     height 70px
