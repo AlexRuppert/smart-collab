@@ -40,7 +40,7 @@ export default class Note extends Vue {
 
   isDragged = false
   isEdited = false
-  interactInstance!: Interactable
+  interactInstance!: any
   recomputeTextStyle = false
 
   @Ref()
