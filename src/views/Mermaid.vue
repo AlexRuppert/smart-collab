@@ -71,14 +71,14 @@ export default class Mermaid extends Vue {
   height 100%
   column-gap 10px
   row-gap 10px
-  grid-template-columns 1fr 1fr
+  grid-template-columns 1fr 1fr 1fr
   grid-template-rows auto 1fr 1fr
 
   @media (min-width: 1264px)
-    grid-template-areas 'room room' 'editor graph' 'editor graph'
+    grid-template-areas 'room room room' 'editor graph graph' 'editor graph graph'
 
   @media (max-width: 1264px)
-    grid-template-areas 'room room' 'editor editor' 'graph graph'
+    grid-template-areas 'room room room' 'editor editor editor' 'graph graph graph'
 
 .editor
   grid-area editor

@@ -17,7 +17,7 @@
       .title {{title}}
       v-spacer
 
-    v-content
+    v-main
       router-view#router
 </template>
 

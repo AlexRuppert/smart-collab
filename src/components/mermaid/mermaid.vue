@@ -1,9 +1,13 @@
 <template lang="pug">
-  v-card.graph-card 
+  v-card.graph-card(:class='{fullscreen:fullscreen}')
     v-card-title.pl-0.py-0
       v-toolbar(dense flat)
+        v-btn(icon @click='toggleFullscreen')
+          v-icon(v-show='fullscreen') mdi-fullscreen-exit
+          v-icon(v-show='!fullscreen') mdi-fullscreen
         v-toolbar-title Diagram
         v-spacer
+          
         v-btn(icon @click='zoomReset')
           v-icon mdi-image-filter-center-focus
         v-menu(offset-y :close-on-content-click='false')
@@ -81,6 +85,8 @@ export default class Mermaid extends Vue {
       smoothScroll: false,
     },
   }
+  fullscreen = false
+
   get svg() {
     if (this.code.length <= 0) {
       return `<rect x="0" ry="0" x="0" y="0" width="2" height="2" opacity="0"></rect>`
@@ -94,6 +100,10 @@ export default class Mermaid extends Vue {
   @Watch('code')
   onCodeChanged(value: string, oldValue: string) {
     this.updateMermaid(this.code)
+  }
+
+  toggleFullscreen() {
+    this.fullscreen = !this.fullscreen
   }
 
   zoomReset() {
@@ -111,8 +121,10 @@ export default class Mermaid extends Vue {
   insertSvg(svgCode, bindFunctions) {
     svgCode = svgCode
       .replace(/class="title"/g, '')
-      .replace(/Times New Roman/g, 'trebuchet ms')
+      .replace(/Times New Roman/g, 'tahoma')
       .replace(/#eaeaea|#eee/g, '#fff')
+      .replace(/#999/g, '#111')
+      .replace(/black/g, '#55d')
 
     this.graph.svg = svgCode
   }
@@ -161,6 +173,14 @@ export default class Mermaid extends Vue {
 </script>
 
 <style lang="stylus" scoped>
+.graph-card.fullscreen
+  position fixed
+  top 0
+  right 0
+  bottom 0
+  left 0
+  z-index 6
+
 .mermaid-container
   height 100%
 
