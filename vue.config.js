@@ -7,7 +7,7 @@ module.exports = {
 
   pluginOptions: {
     ghPages: {
-      dir: 'dist'
-    }
-  }
+      dir: 'docs',
+    },
+  },
 }
