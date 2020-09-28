@@ -46,6 +46,7 @@ v-card.graph-card(:class='{ fullscreen: fullscreen }')
     #mermaid
       svg(xmlns='http://www.w3.org/2000/svg')
         g(ref='mermaidView', v-html='svg')
+      .tmp
 </template>
 
 <script lang="ts">
@@ -165,7 +166,12 @@ export default class Mermaid extends Vue {
         return
       }
       mermaid.parse(code)
-      mermaid.mermaidAPI.render('mermaidSvG', code, this.insertSvg)
+      mermaid.mermaidAPI.render(
+        'mermaidSvG',
+        code,
+        this.insertSvg,
+        document.querySelector('.tmp'),
+      )
       this.$emit('parseResult', { success: true, error: {} })
     } catch (err) {
       if (!err?.str) {
