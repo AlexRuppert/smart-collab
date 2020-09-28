@@ -140,6 +140,7 @@ export default class Mermaid extends Vue {
     svgCode = svgCode
       .replace(/class="title"/g, '')
       .replace(/Times New Roman/g, 'tahoma')
+      .replace(/<br>/g, '<br/>')
       .replace(/#eaeaea|#eee/g, '#fff')
       .replace(/#999/g, '#111')
       .replace(/black/g, '#55d')
@@ -166,12 +167,8 @@ export default class Mermaid extends Vue {
         return
       }
       mermaid.parse(code)
-      mermaid.mermaidAPI.render(
-        'mermaidSvG',
-        code,
-        this.insertSvg,
-        document.querySelector('.tmp'),
-      )
+
+      mermaid.mermaidAPI.render('mermaidSvG', code, this.insertSvg)
       this.$emit('parseResult', { success: true, error: {} })
     } catch (err) {
       if (!err?.str) {
@@ -222,4 +219,7 @@ export default class Mermaid extends Vue {
     width 100% !important
     height 100%
     border 1px solid #f0f0f0
+
+#mermaidSvG .node .label
+  line-height 1em
 </style>
