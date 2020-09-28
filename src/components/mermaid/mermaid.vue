@@ -1,34 +1,51 @@
 <template lang="pug">
-  v-card.graph-card(:class='{fullscreen:fullscreen}')
-    v-card-title.pl-0.py-0
-      v-toolbar(dense flat)
-        v-btn(icon @click='toggleFullscreen')
-          v-icon(v-show='fullscreen') mdi-fullscreen-exit
-          v-icon(v-show='!fullscreen') mdi-fullscreen
-        v-toolbar-title Diagram
-        v-spacer
-          
-        v-btn(icon @click='zoomReset')
-          v-icon mdi-image-filter-center-focus
-        v-menu(offset-y :close-on-content-click='false')
-          template(v-slot:activator='{ on }')
-            v-btn(icon v-on='on')
-              v-icon mdi-brush
-          v-card.pa-2
-            v-select.curve-select(v-model='graph.config.theme' :items='themes'
-              label='Theme' hide-details prepend-icon='mdi-palette' single-line solo flat dense)
-            v-divider
-            v-select.curve-select(v-show='code.startsWith("graph")' v-model='graph.config.flowchart.curve' :items='curves'
-              label='Curves' hide-details prepend-icon='mdi-chart-timeline-variant' single-line solo flat dense)
-        v-btn(color='primary' icon @click='saveSvg()')
-          v-icon mdi-floppy
-        
-    v-card-text.mermaid-container.pt-0
-      #mermaid
-        svg(xmlns="http://www.w3.org/2000/svg")
-          g(ref='mermaidView' v-html='svg')
-          
-    
+v-card.graph-card(:class='{ fullscreen: fullscreen }')
+  v-card-title.pl-0.py-0
+    v-toolbar(dense, flat)
+      v-btn(icon, @click='toggleFullscreen')
+        v-icon(v-show='fullscreen') mdi-fullscreen-exit
+        v-icon(v-show='!fullscreen') mdi-fullscreen
+      v-toolbar-title Diagram
+      v-spacer
+
+      v-btn(icon, @click='zoomReset')
+        v-icon mdi-image-filter-center-focus
+      v-menu(offset-y, :close-on-content-click='false')
+        template(v-slot:activator='{ on }')
+          v-btn(icon, v-on='on')
+            v-icon mdi-brush
+        v-card.pa-2
+          v-select.curve-select(
+            v-model='graph.config.theme',
+            :items='themes',
+            label='Theme',
+            hide-details,
+            prepend-icon='mdi-palette',
+            single-line,
+            solo,
+            flat,
+            dense
+          )
+          v-divider
+          v-select.curve-select(
+            v-show='code.startsWith("graph")',
+            v-model='graph.config.flowchart.curve',
+            :items='curves',
+            label='Curves',
+            hide-details,
+            prepend-icon='mdi-chart-timeline-variant',
+            single-line,
+            solo,
+            flat,
+            dense
+          )
+      v-btn(color='primary', icon, @click='saveSvg()')
+        v-icon mdi-floppy
+
+  v-card-text.mermaid-container.pt-0
+    #mermaid
+      svg(xmlns='http://www.w3.org/2000/svg')
+        g(ref='mermaidView', v-html='svg')
 </template>
 
 <script lang="ts">
@@ -76,7 +93,7 @@ export default class Mermaid extends Vue {
     instance: null as any | null,
     last: { x: 0, y: 0, zoom: 1 },
     config: {
-      maxZoom: 3,
+      maxZoom: 9,
       minZoom: 0.4,
       zoomScaleSensitivity: 1,
       zoomDoubleClickSpeed: 3,
@@ -143,7 +160,7 @@ export default class Mermaid extends Vue {
       if (document.querySelector('#dmermaidSvG')) {
         document
           .querySelectorAll('#dmermaidSvG')
-          .forEach(e => e?.parentNode?.removeChild(e))
+          .forEach((e) => e?.parentNode?.removeChild(e))
         this.initGraph()
         return
       }

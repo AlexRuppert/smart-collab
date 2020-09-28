@@ -1,20 +1,30 @@
 <template lang="pug">
-  v-card.editor-card
-    v-card-title.pl-0.py-0
-      v-toolbar(dense flat)
-        v-toolbar-title Editor
-        v-spacer
-        v-btn(icon href='https://mermaid-js.github.io/mermaid/#/flowchart' target='_blank' rel='noopener')
-          v-icon mdi-help-circle-outline
-        v-btn(icon @click='$refs.fileElement.click()')
-          v-icon mdi-cloud-upload-outline
-        v-btn(icon @click='exportContent')
-          v-icon mdi-cloud-download-outline
-    v-card-text#editor.pb-0
-      div.codemirror-container
-      .error-container.py-2
-          pre.error-list {{errorOutput}}
-    input(ref='fileElement' type='file' style='display:none' @change='importContent')
+v-card.editor-card
+  v-card-title.pl-0.py-0
+    v-toolbar(dense, flat)
+      v-toolbar-title Editor
+      v-spacer
+      v-btn(
+        icon,
+        href='https://mermaid-js.github.io/mermaid/#/flowchart',
+        target='_blank',
+        rel='noopener'
+      )
+        v-icon mdi-help-circle-outline
+      v-btn(icon, @click='$refs.fileElement.click()')
+        v-icon mdi-cloud-upload-outline
+      v-btn(icon, @click='exportContent')
+        v-icon mdi-cloud-download-outline
+  v-card-text#editor.pb-0
+    .codemirror-container
+    .error-container.py-2
+      pre.error-list {{ errorOutput }}
+  input(
+    ref='fileElement',
+    type='file',
+    style='display:none',
+    @change='importContent'
+  )
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
@@ -58,12 +68,7 @@ export default class Editor extends Vue {
   get errorOutput() {
     if (this.errors.length > 0) {
       return this.errors
-        .map(e =>
-          e.str
-            .split('\n')
-            .slice(0, 3)
-            .join('\n'),
-        )
+        .map((e) => e.str.split('\n').slice(0, 3).join('\n'))
         .join('\n')
     }
 
@@ -77,7 +82,7 @@ export default class Editor extends Vue {
 
     if (files && files[0]) {
       const reader = new FileReader()
-      reader.onload = data => {
+      reader.onload = (data) => {
         const fileContent = data?.target?.result?.toString()
         if (fileContent != undefined) {
           this.value = fileContent
@@ -132,6 +137,7 @@ C -->|Two| E[Result 2]`.trim(),
 .editor-card
   display flex
   flex-direction column
+  overflow hidden
 
 #editor
   display flex
@@ -151,7 +157,8 @@ C -->|Two| E[Result 2]`.trim(),
   color #a90101
   font-size small
   font-family monospace
-  line-height normal</style>
+  line-height normal
+</style>
 
 <style lang="stylus">
 .gutter-error
