@@ -139,11 +139,12 @@ export default class Mermaid extends Vue {
   insertSvg(svgCode, bindFunctions) {
     svgCode = svgCode
       .replace(/class="title"/g, '')
-      .replace(/Times New Roman/g, 'tahoma')
+      .replace(/Times New Roman/g, 'verdana')
       .replace(/<br>/g, '<br/>')
       .replace(/#eaeaea|#eee/g, '#fff')
       .replace(/#999/g, '#111')
       .replace(/black/g, '#55d')
+      .replace(/#mermaidSvG\{/g, '#mermaidSvG{line-height:13px;')
 
     this.graph.svg = svgCode
   }
@@ -220,6 +221,8 @@ export default class Mermaid extends Vue {
     height 100%
     border 1px solid #f0f0f0
 
-#mermaidSvG .node .label
+#mermaidSvG *
+  letter-spacing normal
+  font-size 1em
   line-height 1em
 </style>
