@@ -13,7 +13,7 @@
     "file-saver": "^2.0.2",
     "html2canvas": "^1.0.0-rc.5",
     "interactjs": "^1.9.9",
-    "mermaid": "^8.4.8",
+    "mermaid": "^8.10.2",
     "pan-zoom": "^3.5.0",
     "panzoom": "^9.2.1",
     "svg-pan-zoom": "^3.6.1",
