@@ -30,8 +30,13 @@ v-card.editor-card
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import CodeMirror from 'codemirror/lib/codemirror.js'
 //import 'codemirror/mode/javascript/javascript.js'
+import 'codemirror/addon/search/search.js'
+import 'codemirror/addon/search/searchcursor.js'
+import 'codemirror/addon/dialog/dialog.js'
+import 'codemirror/addon/dialog/dialog.css'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/idea.css'
+
 import debounce from 'un-debounce'
 import FileSaver from 'file-saver'
 
