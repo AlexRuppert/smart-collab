@@ -13,15 +13,15 @@ export const routes: Array<RouteConfig> = [
     },
     component: Home,
   },
-  {
+  /**{
     path: '/sticky-notes',
     name: 'Sticky Notes',
     meta: {
       icon: 'mdi-view-grid',
     },
     component: () =>
-      import(/* webpackChunkName: "sticky" */ '../views/StickyNotes.vue'),
-  },
+      import(/* webpackChunkName: "sticky" / '../views/StickyNotes.vue'),
+  },*/
   {
     path: '/mermaid',
     name: 'Mermaid',

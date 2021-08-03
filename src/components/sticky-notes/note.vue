@@ -20,7 +20,7 @@ import {
 import interact from 'interactjs'
 import Interactable from '@interactjs/core/Interactable'
 import { mean } from 'lodash'
-import { clamp } from '@/shared/utils.ts'
+import { clamp } from '@/shared/utils'
 import {
   PaperColors,
   InkColors,

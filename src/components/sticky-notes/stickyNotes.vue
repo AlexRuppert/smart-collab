@@ -1,25 +1,64 @@
 <template lang="pug">
-  v-card
-    v-card-title.px-0.py-0
-      ToolBar(:activeTool.sync='activeTool' :tools.sync='tools' :processing='processing' 
-        @clearNotes='clearNotes' @zoomReset='zoomReset' @snapshot='snapshot')
-    v-card-text.canvas-container.pb-0(ref='canvasContainer' v-resize:debounce='updateDimensions')
-      .canvas(ref='canvasElement' data-pan :style='canvasStyle' @contextmenu.prevent='')
-        Note(v-for='note in notes' :key='note.id' :id='note.id' :ref='note.id' :type='note.type' :value.sync='note.value'
-          :color='note.color' :canvas='{scale:canvas.scale, x: canvas.x, y: canvas.y, dimensions: canvasDimensions, viewPort: dimensions.viewPort}'
-          :zIndex='note.zIndex' :isCrumbled='note.isCrumbled' :position.sync='note.position'
-          :grid='tools.grid.enabled'
-          @noteUpdate='onNoteUpdate' @noteMenu='onNoteMenu')
-      .note-selection(data-html2canvas-ignore)
-        Note(v-for='note in noteCreation' :key='note.id' :id='note.id' :type='note.type'
-          :color='note.color' :position.sync='note.position'
-          @noteUpdate='onNoteCreationUpdate')
-      .bin-container(ref='bin' :class='{"drag-over":isOverBin}' data-html2canvas-ignore)
-        v-icon.bin.ui-element {{isOverBin?'mdi-delete-empty':'mdi-delete'}}
-      .pointer-layer
-        PointerIndicator(v-for='pointer in pointers' :key='pointer.id' :position='pointer.position' :user='pointer.user')
-    NoteMenu(:menu.sync='noteMenu' @noteMenuAction='onNoteMenuAction')
-
+v-card
+  v-card-title.px-0.py-0
+    ToolBar(
+      :activeTool.sync='activeTool',
+      :tools.sync='tools',
+      :processing='processing',
+      @clearNotes='clearNotes',
+      @zoomReset='zoomReset',
+      @snapshot='snapshot'
+    )
+  v-card-text.canvas-container.pb-0(
+    ref='canvasContainer',
+    v-resize:debounce='updateDimensions'
+  )
+    .canvas(
+      ref='canvasElement',
+      data-pan,
+      :style='canvasStyle',
+      @contextmenu.prevent=''
+    )
+      Note(
+        v-for='note in notes',
+        :key='note.id',
+        :id='note.id',
+        :ref='note.id',
+        :type='note.type',
+        :value.sync='note.value',
+        :color='note.color',
+        :canvas='{ scale: canvas.scale, x: canvas.x, y: canvas.y, dimensions: canvasDimensions, viewPort: dimensions.viewPort }',
+        :zIndex='note.zIndex',
+        :isCrumbled='note.isCrumbled',
+        :position.sync='note.position',
+        :grid='tools.grid.enabled',
+        @noteUpdate='onNoteUpdate',
+        @noteMenu='onNoteMenu'
+      )
+    .note-selection(data-html2canvas-ignore)
+      Note(
+        v-for='note in noteCreation',
+        :key='note.id',
+        :id='note.id',
+        :type='note.type',
+        :color='note.color',
+        :position.sync='note.position',
+        @noteUpdate='onNoteCreationUpdate'
+      )
+    .bin-container(
+      ref='bin',
+      :class='{ "drag-over": isOverBin }',
+      data-html2canvas-ignore
+    )
+      v-icon.bin.ui-element {{ isOverBin ? "mdi-delete-empty" : "mdi-delete" }}
+    .pointer-layer
+      PointerIndicator(
+        v-for='pointer in pointers',
+        :key='pointer.id',
+        :position='pointer.position',
+        :user='pointer.user'
+      )
+  NoteMenu(:menu.sync='noteMenu', @noteMenuAction='onNoteMenuAction')
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, Watch, Ref } from 'vue-property-decorator'
@@ -41,7 +80,7 @@ import { snapshot } from './export'
 import ToolBar from './toolBar.vue'
 import PointerIndicator from './pointerIndicator.vue'
 import interact from 'interactjs'
-import { generateUID, clamp } from '@/shared/utils.ts'
+import { generateUID, clamp } from '@/shared/utils'
 import { throttle, defaultsDeep, defer } from 'lodash'
 import panzoom from 'pan-zoom'
 import resize from 'vue-resize-directive'
@@ -135,7 +174,7 @@ export default class StickyNotes extends Vue {
   onNoteUpdate(event: { type: NoteUpdateEventTypes; [key: string]: any }) {
     const note = this.findNote(event.note.id)
 
-    const throttledMove = throttle(note => {
+    const throttledMove = throttle((note) => {
       this.$emit(UPDATE_EVENT, {
         type: NoteUpdateEventTypes.move,
         note,
@@ -155,7 +194,7 @@ export default class StickyNotes extends Vue {
         break
       case NoteUpdateEventTypes.tap:
         if (this.activeTool !== ToolTypes.bucket) {
-          ;(this.$refs[note.id][0] as Note).startEdit()
+          ;((this.$refs[note.id] as Element)[0] as Note).startEdit()
         }
         if (this.activeTool === ToolTypes.bucket) {
           this.changePaperColor(
@@ -186,7 +225,7 @@ export default class StickyNotes extends Vue {
   }
 
   findNote(id): NoteParameters | undefined {
-    return this.notes.find(note => note.id === id)
+    return this.notes.find((note) => note.id === id)
   }
   changePaperColor(note: NoteParameters, color: PaperColors) {
     note.color.paper = color
@@ -237,7 +276,7 @@ export default class StickyNotes extends Vue {
 
   deleteNote(id: string, network = false) {
     const foundNote = this.findNote(id)
-    this.notes = this.notes.filter(note => note.id !== id)
+    this.notes = this.notes.filter((note) => note.id !== id)
     if (!network) {
       this.$emit(UPDATE_EVENT, {
         type: NoteUpdateEventTypes.delete,
@@ -246,7 +285,7 @@ export default class StickyNotes extends Vue {
     }
   }
   clearNotes() {
-    this.notes.forEach(note => {
+    this.notes.forEach((note) => {
       this.deleteNote(note.id)
     })
   }
@@ -274,7 +313,7 @@ export default class StickyNotes extends Vue {
         this.updateNoteToTop(foundNote)
         break
       case SyncEventTypes.pointerMove:
-        let localPointer = this.pointers.find(p => p.id === event.pointer.id)
+        let localPointer = this.pointers.find((p) => p.id === event.pointer.id)
         if (!localPointer) {
           localPointer = { ...event.pointer } as PointerParameters
           this.pointers.push(localPointer)
@@ -306,18 +345,18 @@ export default class StickyNotes extends Vue {
     }) as NoteParameters
 
     defer(() => {
-      ;(this.$refs[newNote.id][0] as Note).startEdit()
+      ;((this.$refs[newNote.id] as Element)[0] as Note).startEdit()
     })
   }
   initPointerIndicators() {
-    const throttledMove = throttle(pointer => {
+    const throttledMove = throttle((pointer) => {
       this.$emit(UPDATE_EVENT, {
         type: SyncEventTypes.pointerMove,
         pointer,
       })
     }, config.sync)
 
-    this.canvasElement.addEventListener('mousemove', e => {
+    this.canvasElement.addEventListener('mousemove', (e) => {
       if (!this.dimensions) return
       let mouseX = e.pageX - this.dimensions.viewPort.x
       let mouseY = e.pageY - this.dimensions.viewPort.y
@@ -329,7 +368,7 @@ export default class StickyNotes extends Vue {
     setInterval(() => {
       const now = Date.now()
       this.pointers = this.pointers.filter(
-        pointer => pointer.lastUpdate + 5 * 1000 > now,
+        (pointer) => pointer.lastUpdate + 5 * 1000 > now,
       )
     }, 1000)
   }
@@ -357,7 +396,7 @@ export default class StickyNotes extends Vue {
       return { x, y, scale }
     }
 
-    this.canvasElement.addEventListener('wheel', e => {
+    this.canvasElement.addEventListener('wheel', (e) => {
       e.preventDefault()
       if (!this.dimensions) return
 
@@ -378,7 +417,7 @@ export default class StickyNotes extends Vue {
       this.canvas = ensureBounds(this.dimensions, { x, y, scale: newScale })
     })
 
-    this.zoomInstance = panzoom(this.canvasElement, e => {
+    this.zoomInstance = panzoom(this.canvasElement, (e) => {
       if (e.dz !== 0 || e.srcElement.dataset.pan === undefined) return
 
       this.canvas = ensureBounds(this.dimensions, {
@@ -473,18 +512,18 @@ export default class StickyNotes extends Vue {
       this.isOverBin = value
       if (note) note.isCrumbled = value
     }
-    const getId = event => event.relatedTarget.dataset.id
+    const getId = (event) => event.relatedTarget.dataset.id
     interact(this.bin)
       .dropzone({
-        ondrop: event => {
+        ondrop: (event) => {
           this.isOverBin = false
           this.deleteNote(getId(event))
         },
       })
-      .on('dragenter', event => {
+      .on('dragenter', (event) => {
         setCrumbled(getId(event), true)
       })
-      .on('dragleave', event => {
+      .on('dragleave', (event) => {
         setCrumbled(getId(event), false)
       })
   }

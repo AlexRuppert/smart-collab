@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "skipLibCheck": true,
+    "target": "ES2016",
     "module": "esnext",
     "strict": true,
     "strictNullChecks": true,
