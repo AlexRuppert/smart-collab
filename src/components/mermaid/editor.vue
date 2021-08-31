@@ -1,7 +1,10 @@
 <template lang="pug">
-v-card.editor-card
+v-card.editor-card(:class='{ fullscreen: fullscreen }')
   v-card-title.pl-0.py-0
     v-toolbar(dense, flat)
+      v-btn(icon, @click='toggleFullscreen')
+        v-icon(v-show='fullscreen') mdi-fullscreen-exit
+        v-icon(v-show='!fullscreen') mdi-fullscreen
       v-toolbar-title Editor
       v-spacer
       v-btn(icon, @click='replaceAll')
@@ -51,6 +54,7 @@ export default class Editor extends Vue {
   }
   @Prop({ default: () => [] })
   errors!: any[]
+  fullscreen = false
 
   @Watch('errors', { deep: true })
   onErrorsChanged(value: any[], oldValue: any[]) {
@@ -83,6 +87,11 @@ export default class Editor extends Vue {
     
     `
   }
+
+  toggleFullscreen() {
+    this.fullscreen = !this.fullscreen
+  }
+
   replaceAll() {
     this.editor.instance.execCommand('replaceAll')
   }
@@ -168,6 +177,14 @@ C -->|Two| E[Result 2]`.trim()
   display flex
   flex-direction column
   overflow hidden
+
+  &.fullscreen
+    position fixed
+    top 0
+    right 0
+    bottom 0
+    left 0
+    z-index 6
 
 #editor
   display flex
