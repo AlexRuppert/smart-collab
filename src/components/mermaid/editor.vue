@@ -83,8 +83,8 @@ export default class Editor extends Vue {
     
     `
   }
-  replaceAll(){
-    this.editor.instance.execCommand("replaceAll")
+  replaceAll() {
+    this.editor.instance.execCommand('replaceAll')
   }
   importContent(event) {
     const files = event.srcElement.files
@@ -200,6 +200,11 @@ C -->|Two| E[Result 2]`.trim()
 
 .CodeMirror-scroll
   padding-top 10px
+
+.CodeMirror-code > div:last-child::after
+  display block
+  height 3em
+  content ' '
 
 .remote-caret
   position absolute
