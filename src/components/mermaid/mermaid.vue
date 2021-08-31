@@ -145,6 +145,7 @@ export default class Mermaid extends Vue {
       .replace(/#999/g, '#111')
       .replace(/black/g, '#55d')
       .replace(/#mermaidSvG\{/g, '#mermaidSvG{line-height:13px;')
+      .replace(/\/svg" height=".*viewBox/g, '/svg" viewBox')
 
     this.graph.svg = svgCode
   }
@@ -154,8 +155,8 @@ export default class Mermaid extends Vue {
       this.$refs.mermaidView as SVGElement,
       this.zoom.config,
     )
-
-    //this.global1.pz = this.zoom.instance
+    //@ts-ignore
+    this.global1.pz = this.zoom.instance
   }
   updateMermaid(code) {
     if (code.length <= 0) return
@@ -223,6 +224,5 @@ export default class Mermaid extends Vue {
 
 #mermaidSvG *
   letter-spacing normal
-  font-size 1em
   line-height 1em
 </style>
