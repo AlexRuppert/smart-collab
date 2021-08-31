@@ -21,7 +21,7 @@ v-container
     v-col
       v-card
         v-card-title Mermaid Swarm
-        v-card-text Create diagrams collaboratively using
+        v-card-text Create diagrams collaboratively using 
           a(href='https://github.com/mermaid-js/mermaid#readme') mermaid
           | .
         v-card-actions

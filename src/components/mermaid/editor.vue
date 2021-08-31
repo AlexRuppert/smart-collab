@@ -22,7 +22,7 @@ v-card.editor-card
   input(
     ref='fileElement',
     type='file',
-    style='display:none',
+    style='display: none',
     @change='importContent'
   )
 </template>
@@ -106,13 +106,19 @@ export default class Editor extends Vue {
     FileSaver.saveAs(blob, fileName)
   }
   initEditor() {
-    this.editor.instance = CodeMirror(document.querySelector('#editor > div'), {
-      value: `
+    const urlSearchParams = new URLSearchParams(window.location.search)
+    const params = Object.fromEntries(urlSearchParams.entries())
+    let initialCode = `
 graph TD
 A[Hard] -->|Text| B(Round)
 B --> C{Decision}
 C -->|One| D[Result 1]
-C -->|Two| E[Result 2]`.trim(),
+C -->|Two| E[Result 2]`.trim()
+    if (params.code) {
+      initialCode = window.atob(decodeURIComponent(params.code))
+    }
+    this.editor.instance = CodeMirror(document.querySelector('#editor > div'), {
+      value: initialCode,
       theme: 'idea',
       lineNumbers: true,
       gutters: ['errors'],
@@ -128,9 +134,24 @@ C -->|Two| E[Result 2]`.trim(),
       debounce((instance, changeObj) => {
         this.value = this.editor.instance.doc.getValue()
         this.$emit('input', this.value)
+        this.updateUrl(this.value)
       }, 200),
     )
     this.$emit('editor', this.editor.instance)
+  }
+
+  updateUrl(code) {
+    const urlSearchParams = new URLSearchParams(window.location.search)
+    urlSearchParams.set('code', window.btoa(code.trim()))
+    const newUrl =
+      window.location.origin +
+      window.location.pathname +
+      '?' +
+      urlSearchParams.toString() +
+      window.location.hash
+
+    if (newUrl !== window.location.toString())
+      window.history.pushState({}, '', newUrl)
   }
 
   mounted() {
