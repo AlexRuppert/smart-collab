@@ -4,6 +4,8 @@ v-card.editor-card
     v-toolbar(dense, flat)
       v-toolbar-title Editor
       v-spacer
+      v-btn(icon, @click='replaceAll')
+        v-icon mdi-find-replace
       v-btn(
         icon,
         href='https://mermaid-js.github.io/mermaid/#/flowchart',
@@ -81,7 +83,9 @@ export default class Editor extends Vue {
     
     `
   }
-
+  replaceAll(){
+    this.editor.instance.execCommand("replaceAll")
+  }
   importContent(event) {
     const files = event.srcElement.files
 
