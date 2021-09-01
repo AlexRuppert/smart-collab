@@ -158,10 +158,10 @@ C -->|Two| E[Result 2]`.trim()
     urlSearchParams.set('code', window.btoa(code.trim()))
     const newUrl =
       window.location.origin +
-      window.location.pathname +
+      window.location.pathname + window.location.hash
       '?' +
-      urlSearchParams.toString() +
-      window.location.hash
+      urlSearchParams.toString()
+      
 
     if (newUrl !== window.location.toString())
       window.history.pushState({}, '', newUrl)
