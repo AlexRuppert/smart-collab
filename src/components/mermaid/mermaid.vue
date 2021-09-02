@@ -39,6 +39,8 @@ v-card.graph-card(:class='{ fullscreen: fullscreen }')
             flat,
             dense
           )
+      v-btn(icon, @click='copyPng()')
+        v-icon mdi-camera
       v-btn(color='primary', icon, @click='saveSvg()')
         v-icon mdi-floppy
 
@@ -134,6 +136,38 @@ export default class Mermaid extends Vue {
       type: 'image/svg+xml;charset=utf-8',
     })
     FileSaver.saveAs(blob, fileName)
+  }
+
+  svgToPng(svgElement) {
+    return new Promise((res, rej) => {
+      const image = new Image()
+      const svgBlob =
+        'data:image/svg+xml;base64,' + window.btoa(svgElement.outerHTML)
+
+      image.crossOrigin = 'anonymous'
+      image.onload = function () {
+        const canvas = document.createElement('canvas')
+        canvas.width = svgElement.viewBox.baseVal.width
+        canvas.height = svgElement.viewBox.baseVal.height
+        const context = canvas.getContext('2d') as CanvasRenderingContext2D
+        context.drawImage(image, 0, 0)
+        canvas.toBlob((blob) => res(blob))
+      }
+
+      image.src = svgBlob
+    })
+  }
+  async copyPng() {
+    const svgElement = document.getElementById('mermaidSvG')
+    if (svgElement) {
+      //@ts-ignore
+      navigator.clipboard.write([
+        //@ts-ignore
+        new ClipboardItem({
+          'image/png': await this.svgToPng(svgElement),
+        }),
+      ])
+    }
   }
 
   insertSvg(svgCode, bindFunctions) {
