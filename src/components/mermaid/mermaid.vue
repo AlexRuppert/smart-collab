@@ -150,6 +150,8 @@ export default class Mermaid extends Vue {
         canvas.width = svgElement.viewBox.baseVal.width
         canvas.height = svgElement.viewBox.baseVal.height
         const context = canvas.getContext('2d') as CanvasRenderingContext2D
+        context.fillStyle = '#fff'
+        context.fillRect(0, 0, canvas.width, canvas.height)
         context.drawImage(image, 0, 0)
         canvas.toBlob((blob) => res(blob))
       }
