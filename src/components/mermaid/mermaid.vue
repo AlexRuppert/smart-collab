@@ -2,17 +2,17 @@
 v-card.graph-card(:class='{ fullscreen: fullscreen }')
   v-card-title.pl-0.py-0
     v-toolbar(dense, flat)
-      v-btn(icon, @click='toggleFullscreen' v-tooltip='"Toggle Fullscreen"')
+      v-btn(icon, @click='toggleFullscreen', v-tooltip='"Toggle Fullscreen"')
         v-icon(v-show='fullscreen') mdi-fullscreen-exit
         v-icon(v-show='!fullscreen') mdi-fullscreen
       v-toolbar-title Diagram
       v-spacer
 
-      v-btn(icon, @click='zoomReset' v-tooltip='"Reset Zoom"')
+      v-btn(icon, @click='zoomReset', v-tooltip='"Reset Zoom"')
         v-icon mdi-image-filter-center-focus
       v-menu(offset-y, :close-on-content-click='false')
         template(v-slot:activator='{ on }')
-          v-btn(icon, v-on='on' v-tooltip='"Style"')
+          v-btn(icon, v-on='on', v-tooltip='"Style"')
             v-icon mdi-brush
         v-card.pa-2
           v-select.curve-select(
@@ -39,9 +39,9 @@ v-card.graph-card(:class='{ fullscreen: fullscreen }')
             flat,
             dense
           )
-      v-btn(icon, @click='copyPng()' v-tooltip='"Copy as PNG to Clipboard"')
+      v-btn(icon, @click='copyPng()', v-tooltip='"Copy as PNG to Clipboard"')
         v-icon mdi-camera
-      v-btn(color='primary', icon, @click='saveSvg()' v-tooltip='"Save SVG"')
+      v-btn(color='primary', icon, @click='saveSvg()', v-tooltip='"Save SVG"')
         v-icon mdi-floppy
 
   v-card-text.mermaid-container.pt-0
@@ -142,7 +142,14 @@ export default class Mermaid extends Vue {
     return new Promise((res, rej) => {
       const image = new Image()
       const svgBlob =
-        'data:image/svg+xml;base64,' + window.btoa(svgElement.outerHTML)
+        'data:image/svg+xml;base64,' +
+        window.btoa(
+          svgElement.outerHTML.replace(/./g, function (c) {
+            return c.charCodeAt(0) < 128
+              ? c
+              : '&#x' + c.charCodeAt(0).toString(16)+';'
+          }),
+        )
 
       image.crossOrigin = 'anonymous'
       image.onload = function () {
