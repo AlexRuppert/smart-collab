@@ -2,17 +2,17 @@
 v-card.graph-card(:class='{ fullscreen: fullscreen }')
   v-card-title.pl-0.py-0
     v-toolbar(dense, flat)
-      v-btn(icon, @click='toggleFullscreen')
+      v-btn(icon, @click='toggleFullscreen' v-tooltip='"Toggle Fullscreen"')
         v-icon(v-show='fullscreen') mdi-fullscreen-exit
         v-icon(v-show='!fullscreen') mdi-fullscreen
       v-toolbar-title Diagram
       v-spacer
 
-      v-btn(icon, @click='zoomReset')
+      v-btn(icon, @click='zoomReset' v-tooltip='"Reset Zoom"')
         v-icon mdi-image-filter-center-focus
       v-menu(offset-y, :close-on-content-click='false')
         template(v-slot:activator='{ on }')
-          v-btn(icon, v-on='on')
+          v-btn(icon, v-on='on' v-tooltip='"Style"')
             v-icon mdi-brush
         v-card.pa-2
           v-select.curve-select(
@@ -39,9 +39,9 @@ v-card.graph-card(:class='{ fullscreen: fullscreen }')
             flat,
             dense
           )
-      v-btn(icon, @click='copyPng()')
+      v-btn(icon, @click='copyPng()' v-tooltip='"Copy as PNG to Clipboard"')
         v-icon mdi-camera
-      v-btn(color='primary', icon, @click='saveSvg()')
+      v-btn(color='primary', icon, @click='saveSvg()' v-tooltip='"Save SVG"')
         v-icon mdi-floppy
 
   v-card-text.mermaid-container.pt-0

@@ -2,23 +2,24 @@
 v-card.editor-card(:class='{ fullscreen: fullscreen }')
   v-card-title.pl-0.py-0
     v-toolbar(dense, flat)
-      v-btn(icon, @click='toggleFullscreen')
+      v-btn(icon, @click='toggleFullscreen' v-tooltip='"Toggle Fullscreen"')
         v-icon(v-show='fullscreen') mdi-fullscreen-exit
         v-icon(v-show='!fullscreen') mdi-fullscreen
       v-toolbar-title Editor
       v-spacer
-      v-btn(icon, @click='replaceAll')
+      v-btn(icon, @click='replaceAll' v-tooltip='"Replace All"')
         v-icon mdi-find-replace
       v-btn(
         icon,
         href='https://mermaid-js.github.io/mermaid/#/flowchart',
         target='_blank',
         rel='noopener'
+        v-tooltip='"Syntax Documentation"'
       )
         v-icon mdi-help-circle-outline
-      v-btn(icon, @click='$refs.fileElement.click()')
+      v-btn(icon, @click='$refs.fileElement.click()' v-tooltip='"Import"')
         v-icon mdi-cloud-upload-outline
-      v-btn(icon, @click='exportContent')
+      v-btn(icon, @click='exportContent' v-tooltip='"Export"')
         v-icon mdi-cloud-download-outline
   v-card-text#editor.pb-0
     .codemirror-container
