@@ -141,15 +141,17 @@ export default class Mermaid extends Vue {
   svgToPng(svgElement) {
     return new Promise((res, rej) => {
       const image = new Image()
+      
       const svgBlob =
         'data:image/svg+xml;base64,' +
         window.btoa(
-          svgElement.outerHTML.replace(/./g, function (c) {
+          this.graph.svg.replace(/./g, function (c) {
             return c.charCodeAt(0) < 128
               ? c
               : '&#x' + c.charCodeAt(0).toString(16)+';'
           }),
         )
+
 
       image.crossOrigin = 'anonymous'
       image.onload = function () {
@@ -189,6 +191,7 @@ export default class Mermaid extends Vue {
       .replace(/black/g, '#55d')
       .replace(/#mermaidSvG\{/g, '#mermaidSvG{line-height:13px;')
       .replace(/\/svg" height=".*viewBox/g, '/svg" viewBox')
+      .replaceAll(/(xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" style="[^"]*)"/g, '$1 line-height:0.98em;"')
 
     this.graph.svg = svgCode
   }
